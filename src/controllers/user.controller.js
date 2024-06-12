@@ -224,13 +224,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword, confirmPassword } = req.body;
-
   if (newPassword !== confirmPassword) {
     throw new ApiError(400, "Passwords do not match");
   }
 
   const user = await User.findById(req.user?._id);
-
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
@@ -253,7 +251,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email, username, phoneNumber } = req.body;
-
+  console.log(fullName, email, username, phoneNumber, "jaach lo ");
   if (!fullName || !email || !username || !phoneNumber) {
     throw new ApiError(400, "All fields are required");
   }
