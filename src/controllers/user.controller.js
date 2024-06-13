@@ -3,14 +3,16 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
+
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
@@ -175,7 +177,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken =
       req.cookies.refreshToken || req.body.refreshToken;
-
     if (!incomingRefreshToken) {
       throw new ApiError(401, "Unauthorized request");
     }
@@ -184,7 +185,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
@@ -200,17 +200,18 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
-      await generateAccessAndRefreshToken(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
 
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken: newRefreshToken },
+          { accessToken, refreshToken: refreshToken },
           "Access token refreshed successfully"
         )
       );
@@ -251,7 +252,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email, username, phoneNumber } = req.body;
-  console.log(fullName, email, username, phoneNumber, "jaach lo ");
   if (!fullName || !email || !username || !phoneNumber) {
     throw new ApiError(400, "All fields are required");
   }
@@ -304,6 +304,92 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Avatar updated successfully"));
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    throw new ApiError(400, "Username is required");
+  }
+
+  const user = await User.findOne({ username });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const token = jwt.sign(
+    {
+      _id: user._id,
+      username: user.username,
+    },
+    process.env.RESET_TOKEN_SECRET,
+    {
+      expiresIn: process.env.RESET_TOKEN_EXPIRY,
+    }
+  );
+
+  var transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "stayheaven123@gmail.com",
+      pass: `${process.env.MAIL_PASSWORD}`,
+    },
+  });
+
+  var mailOptions = {
+    from: "stayheaven123@gmail.com",
+    to: "aadijain1404a@gmail.com",
+    subject: "Reset Password",
+    text: `Your password reset link is: https://localhost:8000/api/v1/user/reset-password/${user?._id}/${token}`,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error, "mail error");
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password reset email sent"));
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+  console.log("id: ", id);
+  console.log("token: ", token);
+  console.log("password: ", password);
+  if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
+
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  console.log("user: ", user);
+
+    const decodedToken = jwt.verify(
+      token,
+      process.env.RESET_TOKEN_SECRET,
+      async (err, decoded) => {
+        if (err) {
+          return res.status(400).json(new ApiError(401, "Invalid token"));
+        } else {
+          user.password = password;
+          console.log("user password: ", user.password);
+          user.save({ validateBeforeSave: false });
+          return res
+            .status(200)
+            .json(new ApiResponse(200, {}, "Password reset"));
+        }
+      }
+    );
+    console.log("decodedToken: ", decodedToken);
+});
 export {
   registerUser,
   loginUser,
@@ -313,4 +399,6 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
+  forgotPassword,
+  resetPassword,
 };
