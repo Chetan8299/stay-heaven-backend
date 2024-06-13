@@ -33,6 +33,26 @@ const hotelSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  city: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  state: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  country:{
+    type: String,
+    required: true,
+    trim: true,
+  },
+  pinCode: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 });
 
 export const Hotel = mongoose.model("Hotel", hotelSchema);

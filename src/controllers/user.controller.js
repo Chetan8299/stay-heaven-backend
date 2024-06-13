@@ -98,15 +98,32 @@ const loginUser = asyncHandler(async (req, res) => {
   // check if password is correct
   // access and refresh token
   // send cookie
-  const { username, password } = req.body;
+  const { identity, password } = req.body;
+  const email = identity;
+  const username = identity;
+  let emailUsername;
+  console.log("email: ", email);  
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  if (!username) {
-    throw new ApiError(400, "Username  is required"); // wapas ana email ke liye
+  function isValidEmail(email) {
+    return emailRegex.test(email);
   }
 
-  const user = await User.findOne({
-    username,
-  });
+  console.log("is Valid Email: ", isValidEmail(email));
+  if (isValidEmail(email)) {
+    emailUsername = { email: email };
+  } else {
+    emailUsername = { username: username };
+  }
+
+  console.log("emailUsername: ", emailUsername);
+  if (!emailUsername) {
+    throw new ApiError(400, "Username or Email is required"); // wapas ana email ke liye
+  }
+
+  const user = await User.findOne(emailUsername);
+
+  console.log("user: ", user);
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -359,9 +376,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
-  console.log("id: ", id);
-  console.log("token: ", token);
-  console.log("password: ", password);
+
   if (!password) {
     throw new ApiError(400, "Password is required");
   }
@@ -370,25 +385,20 @@ const resetPassword = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  console.log("user: ", user);
 
-    const decodedToken = jwt.verify(
-      token,
-      process.env.RESET_TOKEN_SECRET,
-      async (err, decoded) => {
-        if (err) {
-          return res.status(400).json(new ApiError(401, "Invalid token"));
-        } else {
-          user.password = password;
-          console.log("user password: ", user.password);
-          user.save({ validateBeforeSave: false });
-          return res
-            .status(200)
-            .json(new ApiResponse(200, {}, "Password reset"));
-        }
+  const decodedToken = jwt.verify(
+    token,
+    process.env.RESET_TOKEN_SECRET,
+    async (err, decoded) => {
+      if (err) {
+        return res.status(400).json(new ApiError(401, "Invalid token"));
+      } else {
+        user.password = password;
+        user.save({ validateBeforeSave: false });
+        return res.status(200).json(new ApiResponse(200, {}, "Password reset"));
       }
-    );
-    console.log("decodedToken: ", decodedToken);
+    }
+  );
 });
 export {
   registerUser,
