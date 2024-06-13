@@ -15,7 +15,6 @@ const createHotel = asyncHandler(async (req, res) => {
     maxGuests,
     city,
     state,
-    country,
     pinCode,
   } = req.body;
 
@@ -28,21 +27,74 @@ const createHotel = asyncHandler(async (req, res) => {
     !maxGuests ||
     !city ||
     !state ||
-    !country ||
     !pinCode
   ) {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = User.findById(req.user?._id);
+  const user = await User.findById(req.user?._id);
 
   if (!user) {
     throw new ApiError(401, "Unauthorized request");
   }
 
 
-  return res.status(200).json(new ApiResponse(200, { files: req.files}, "Hotel created"));
+  let images = [];
+
+  const uploadPromises = req.files.map(async (file, index) => {
+    const image = await uploadOnCloudinary(file.path);
+    if (!image) {
+      throw new ApiError(409, "Image file is required");
+    }
+    images.push(image.url);
+  });
+  
+  await Promise.all(uploadPromises);
+  console.log(images);
+  const hotel = await Hotel.create({
+    title,
+    description,
+    price,
+    facilities,
+    address,
+    maxGuests,
+    city,
+    state,
+    pinCode,
+    images,
+  });
+
+  const createdHotel = await Hotel.findById(hotel._id)
+
+  if (!createdHotel) {
+    throw new ApiError(500, "Something went wrong while creating hotel");
+  }
+
+  user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { createdHotel }, "Hotel created successfully"));
 });
 
+const fetchAllHotels = asyncHandler(async (req, res) => {
+  const hotels = await Hotel.find({});
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
 
-export {createHotel}
+})
+
+const getHotelDetails = asyncHandler(async (req, res) => {
+   const {id} = req.params;
+   const hotel = await Hotel.findById(id);
+   if (!hotel) {
+     throw new ApiError(404, "Hotel not found");
+   }
+   return res
+     .status(200)
+     .json(new ApiResponse(200, { hotel }, "Hotel details fetched successfully"));
+})
+
+
+export {createHotel, fetchAllHotels, getHotelDetails };

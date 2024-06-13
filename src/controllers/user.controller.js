@@ -102,28 +102,28 @@ const loginUser = asyncHandler(async (req, res) => {
   const email = identity;
   const username = identity;
   let emailUsername;
-  console.log("email: ", email);  
+  // console.log("email: ", email);  
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   function isValidEmail(email) {
     return emailRegex.test(email);
   }
 
-  console.log("is Valid Email: ", isValidEmail(email));
+  // console.log("is Valid Email: ", isValidEmail(email));
   if (isValidEmail(email)) {
     emailUsername = { email: email };
   } else {
     emailUsername = { username: username };
   }
 
-  console.log("emailUsername: ", emailUsername);
+  // console.log("emailUsername: ", emailUsername);
   if (!emailUsername) {
     throw new ApiError(400, "Username or Email is required"); // wapas ana email ke liye
   }
 
   const user = await User.findOne(emailUsername);
 
-  console.log("user: ", user);
+  // console.log("user: ", user);
 
   if (!user) {
     throw new ApiError(404, "User not found");
