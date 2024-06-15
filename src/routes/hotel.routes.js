@@ -20,4 +20,5 @@ router.route("/my-previous-booking").post(verifyJWT, myPreviousBooking);
 router.route("/my-created-places").post(verifyJWT, myCreatedPlaces);
 router.route("/search").post(searchHotel)
 
+
 export default router;

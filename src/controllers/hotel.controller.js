@@ -180,17 +180,42 @@ const myCreatedPlaces = asyncHandler(async (req, res) => {
 });
 
 const searchHotel = asyncHandler(async (req, res) => {
-  const { query } = req.body;
-  const hotels = await Hotel.find({
-    $or: [
-      { title: { $regex: query, $options: 'i' } },
-      { city: { $regex: query, $options: 'i' } },
-      { state: { $regex: query, $options: 'i' } },
-    ]
-  });
+  const { soda, cocaCola, searchterm } = req.query;
 
-  return res.status(200).json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
-})
+  const baseQuery = {
+    $or: [
+      { title: { $regex: new RegExp(searchterm, 'i') } },
+      { city: { $regex: new RegExp(`\\b${searchterm}\\b`, 'i') } },
+      { state: { $regex: new RegExp(`\\b${searchterm}\\b`, 'i') } }
+    ]
+  };
+
+  const additionalQueries = [];
+
+  if (soda) {
+    additionalQueries.push({ facilities: { $regex: /soda/i } });
+  }
+
+  if (cocaCola) {
+    additionalQueries.push({ facilities: { $regex: /coca\s*cola/i } });
+  }
+
+  const finalQuery = additionalQueries.length > 0
+    ? { $and: [baseQuery, ...additionalQueries] }
+    : baseQuery;
+
+  const sort = req.query.sort || 'createdAt';
+  const order = req.query.order || 'desc';
+
+  const hotels = await Hotel.find(finalQuery).sort({ [sort]: order });
+
+  return res.status(200).json({
+    status: 200,
+    data: hotels,
+    message: "Hotels fetched successfully"
+  });
+});
+
 export {
   createHotel,
   fetchAllHotels,
@@ -200,3 +225,14 @@ export {
   myCreatedPlaces,
   searchHotel
 };
+
+
+
+// const { query } = req.body;
+//   const hotels = await Hotel.find({
+//     $or: [
+//       { title: { $regex: query, $options: 'i' } },
+//       { city: { $regex: query, $options: 'i' } },
+//       { state: { $regex: query, $options: 'i' } },
+//     ]
+//   });
