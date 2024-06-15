@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Hotel } from "../models/hotel.model.js";
+import mongoose from "mongoose";
 
 const createHotel = asyncHandler(async (req, res) => {
   const {
@@ -133,7 +134,15 @@ const fetchAllHotels = asyncHandler(async (req, res) => {
 
 const getHotelDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const hotel = await Hotel.findById(id);
+  const hotel = await Hotel.findById(id)
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        model: 'User',
+        select: 'username avatar fullName'
+      }
+    });
   if (!hotel) {
     throw new ApiError(404, "Hotel not found");
   }
@@ -166,8 +175,6 @@ const myPreviousBooking = asyncHandler(async (req, res) => {
 });
 
 const myCreatedPlaces = asyncHandler(async (req, res) => {
-  console.log("hi");
-  console.log("req.user: ", req.user?._id);
   const user = await User.findById(req.user?._id);
 
   if (!user) {
@@ -178,6 +185,26 @@ const myCreatedPlaces = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user.myCreatedPlaces, "My created places fetched successfully"));
 });
+
+const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
+  let { id } = req.params;
+  await Hotel.findByIdAndDelete(id);
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  const idStr = id.toString();
+
+  user.myCreatedPlaces = user.myCreatedPlaces.filter(hotel => hotel.toString() !== idStr);
+
+  await user.save();
+
+  return res.status(200).json(new ApiResponse(200, {}, "Hotel deleted successfully"));
+});
+
 
 const searchHotel = asyncHandler(async (req, res) => {
   const { soda, cocaCola, searchterm } = req.query;
@@ -223,7 +250,8 @@ export {
   editHotel,
   myPreviousBooking,
   myCreatedPlaces,
-  searchHotel
+  searchHotel,
+  deleteMyCreatedPlace
 };
 
 

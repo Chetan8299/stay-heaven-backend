@@ -251,9 +251,12 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+
+  const user = await User.findById(req.user?._id).populate("myCreatedPlaces").populate("previousBookings");
+
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
+    .json(new ApiResponse(200, user, "Current user fetched successfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -377,6 +380,8 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
   );
 });
+
+
 export {
   registerUser,
   loginUser,

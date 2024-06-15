@@ -20,9 +20,11 @@ app.use(cookieParser());
 import userRoutes from "./routes/user.routes.js";
 import hotelRoutes from "./routes/hotel.routes.js";
 import utilsRoutes from "./routes/utils.routes.js";
+import commentRoutes from "./routes/comment.routes.js";
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/hotel", hotelRoutes);
 app.use("/api/v1/utils", utilsRoutes);
+app.use("/api/v1/comment", commentRoutes);
 
 export { app };
