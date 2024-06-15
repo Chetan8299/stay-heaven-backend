@@ -16,6 +16,7 @@ const createHotel = asyncHandler(async (req, res) => {
     city,
     state,
     pinCode,
+    images,
   } = req.body;
 
   if (
@@ -38,17 +39,6 @@ const createHotel = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized request");
   }
 
-  let images = [];
-
-  const uploadPromises = req.files.map(async (file, index) => {
-    const image = await uploadOnCloudinary(file.path);
-    if (!image) {
-      throw new ApiError(409, "Image file is required");
-    }
-    images.push(image.url);
-  });
-
-  await Promise.all(uploadPromises);
   const hotel = await Hotel.create({
     title,
     description,
@@ -110,24 +100,28 @@ const editHotel = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  await Hotel.findByIdAndUpdate(id, {
-    $set: {
-      title,
-      description,
-      price,
-      facilities,
-      address,
-      maxGuests,
-      city,
-      state,
-      images,
-      pinCode,
-    }
-  },  { new: true });
+  await Hotel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        title,
+        description,
+        price,
+        facilities,
+        address,
+        maxGuests,
+        city,
+        state,
+        images,
+        pinCode,
+      },
+    },
+    { new: true }
+  );
 
   return res
-  .status(200)
-  .json(new ApiResponse(200, {}, "Hotel updated successfully"));
+    .status(200)
+    .json(new ApiResponse(200, {}, "Hotel updated successfully"));
 });
 
 const fetchAllHotels = asyncHandler(async (req, res) => {
@@ -150,4 +144,59 @@ const getHotelDetails = asyncHandler(async (req, res) => {
     );
 });
 
-export { createHotel, fetchAllHotels, getHotelDetails, editHotel };
+const myPreviousBooking = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  user.previousBookings.push(id);
+  user.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        {},
+        "Hotel Added to my previous bookings successfully"
+      )
+    );
+});
+
+const myCreatedPlaces = asyncHandler(async (req, res) => {
+  console.log("hi");
+  console.log("req.user: ", req.user?._id);
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user.myCreatedPlaces, "My created places fetched successfully"));
+});
+
+const searchHotel = asyncHandler(async (req, res) => {
+  const { query } = req.body;
+  const hotels = await Hotel.find({
+    $or: [
+      { title: { $regex: query, $options: 'i' } },
+      { city: { $regex: query, $options: 'i' } },
+      { state: { $regex: query, $options: 'i' } },
+    ]
+  });
+
+  return res.status(200).json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
+})
+export {
+  createHotel,
+  fetchAllHotels,
+  getHotelDetails,
+  editHotel,
+  myPreviousBooking,
+  myCreatedPlaces,
+  searchHotel
+};

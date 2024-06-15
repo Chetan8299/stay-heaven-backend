@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      trim: true,
     },
     fullName: {
       type: String,
@@ -58,9 +59,11 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       // required: true,
+      trim: true,
     },
     refreshToken: {
       type: String,
+      trim: true,
     },
   },
   { timestamps: true }
@@ -69,8 +72,8 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) next();
 
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
