@@ -1,4 +1,2 @@
-Payment gateway integration 
 login with google
 front end me password me white space check kar lena
-admin payment record
