@@ -1,12 +1,4 @@
 Payment gateway integration 
 login with google
 front end me password me white space check kar lena
-
-admin controller
-admin hotel approve while creation
-admin hotel approve while edition
-admin hotel delete
-admin role edition
 admin payment record
-admin has list of hotels
-admin has list of users

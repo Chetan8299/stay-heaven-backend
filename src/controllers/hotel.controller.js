@@ -115,6 +115,7 @@ const editHotel = asyncHandler(async (req, res) => {
         state,
         images,
         pinCode,
+        approvalStatus: "pending",
       },
     },
     { new: true }
@@ -126,7 +127,9 @@ const editHotel = asyncHandler(async (req, res) => {
 });
 
 const fetchAllHotels = asyncHandler(async (req, res) => {
-  const hotels = await Hotel.find({});
+  const hotels = await Hotel.find({
+    approvalStatus: "approved"
+  });
   return res
     .status(200)
     .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));

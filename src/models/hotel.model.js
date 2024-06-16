@@ -48,6 +48,10 @@ const hotelSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  approvalStatus: {
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  }
 });
 
 export const Hotel = mongoose.model("Hotel", hotelSchema);

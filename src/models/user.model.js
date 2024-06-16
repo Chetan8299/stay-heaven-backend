@@ -48,14 +48,6 @@ const userSchema = new mongoose.Schema(
         ref: "Hotel",
       },
     ],
-    creator: {
-      type: Boolean,
-      default: true,
-    },
-    admin: {
-      type: Boolean,
-      default: false,
-    },
     avatar: {
       type: String,
       // required: true,
@@ -68,7 +60,11 @@ const userSchema = new mongoose.Schema(
     isAdmin:{
       type: Boolean,
       default: false,
-    }
+    },
+    isCreator: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
