@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     previousBookings: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Hotel",
+        ref: "Order",
       },
     ],
     myCreatedPlaces: [

@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Hotel } from "../models/hotel.model.js";
 import mongoose from "mongoose";
+import { Order } from "../models/order.model.js";
 
 const createHotel = asyncHandler(async (req, res) => {
   const {
@@ -239,12 +240,25 @@ const searchHotel = asyncHandler(async (req, res) => {
 
   const hotels = await Hotel.find(finalQuery).sort({ [sort]: order });
 
-  return res.status(200).json({
-    status: 200,
-    data: hotels,
-    message: "Hotels fetched successfully"
-  });
+  return res.status(200).json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
 });
+
+const orderHotel = asyncHandler(async (req, res) => {
+  const {hotelId, checkin, checkout, rooms, amount, userId} = req.body;
+
+  const order = await Order.create({
+    hotelId,
+    checkin,
+    checkout,
+    rooms,
+    amount
+  })
+  const user = await User.findById(userId);
+  user.previousBookings.push(order._id);
+  user.save();
+
+  return res.status(200).json( new ApiResponse(200, {}, "Order created successfully") );
+})
 
 export {
   createHotel,
@@ -254,16 +268,6 @@ export {
   myPreviousBooking,
   myCreatedPlaces,
   searchHotel,
-  deleteMyCreatedPlace
+  deleteMyCreatedPlace,
+  orderHotel,
 };
-
-
-
-// const { query } = req.body;
-//   const hotels = await Hotel.find({
-//     $or: [
-//       { title: { $regex: query, $options: 'i' } },
-//       { city: { $regex: query, $options: 'i' } },
-//       { state: { $regex: query, $options: 'i' } },
-//     ]
-//   });

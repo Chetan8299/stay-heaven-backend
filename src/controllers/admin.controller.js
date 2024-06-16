@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Hotel } from "../models/hotel.model.js";
 import { User } from "../models/user.model.js";
+import { Order } from './../models/order.model.js';
 
 
 const getAllHotels = asyncHandler(async (req, res) => {
@@ -84,4 +85,11 @@ const banUser = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, {}, "User banned successfully"));
 })
 
-export { getAllHotels, approveHotel, removeHotel, getAllUsers, makeAdmin, removeAdmin, banUser };
+const allOrders = asyncHandler(async (req, res) => {
+  const orders = await Order.find().populate("hotelId");
+  return res
+   .status(200)
+   .json(new ApiResponse(200, { orders }, "Orders fetched successfully"));
+});
+
+export { getAllHotels, approveHotel, removeHotel, getAllUsers, makeAdmin, removeAdmin, banUser, allOrders };

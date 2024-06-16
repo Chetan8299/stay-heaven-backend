@@ -49,6 +49,7 @@ const hotelSchema = new mongoose.Schema({
     trim: true,
   },
   approvalStatus: {
+    type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   }
