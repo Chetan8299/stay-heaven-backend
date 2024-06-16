@@ -53,6 +53,6 @@ const hotelSchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   }
-});
+}, {timestamps: true});
 
 export const Hotel = mongoose.model("Hotel", hotelSchema);

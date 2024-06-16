@@ -15,6 +15,6 @@ const commentSchema = new mongoose.Schema({
     max: 5,
     min: 1,
   }
-});
+},{timestamps: true});
 
 export const Comment = mongoose.model("Comment", commentSchema);
