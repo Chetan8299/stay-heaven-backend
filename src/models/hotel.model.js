@@ -7,6 +7,11 @@ const hotelSchema = new mongoose.Schema({
     trim: true,
     index: true,
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   images: [String],
   comments: [
     {

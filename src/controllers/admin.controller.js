@@ -97,7 +97,7 @@ const banUser = asyncHandler(async (req, res) => {
 });
 
 const allOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find().populate("hotelId");
+  const orders = await Order.find().populate("hotelId").populate("customer");
   return res
     .status(200)
     .json(new ApiResponse(200, { orders }, "Orders fetched successfully"));

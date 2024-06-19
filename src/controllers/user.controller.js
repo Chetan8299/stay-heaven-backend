@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { Order } from "../models/order.model.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -38,7 +39,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const { fullName, email, username, password, phoneNumber, avatar } = req.body;
 
-
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
@@ -54,9 +54,11 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email or username or phone number already exists");
+    throw new ApiError(
+      409,
+      "User with email or username or phone number already exists"
+    );
   }
-
 
   const user = await User.create({
     fullName,
@@ -91,7 +93,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const email = identity;
   const username = identity;
   let emailUsername;
-  // console.log("email: ", email);  
+  // console.log("email: ", email);
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   function isValidEmail(email) {
@@ -251,8 +253,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-
-  const user = await User.findById(req.user?._id).populate("myCreatedPlaces").populate("previousBookings");
+  const user = await User.findById(req.user?._id)
+    .populate("myCreatedPlaces")
+    .populate("previousBookings");
 
   return res
     .status(200)
@@ -284,7 +287,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const {avatar} = req.body;
+  const { avatar } = req.body;
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -381,6 +384,34 @@ const resetPassword = asyncHandler(async (req, res) => {
   );
 });
 
+const getOrders = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id).populate({
+    path: 'receivedOrders',
+    populate: {
+      path: 'customer',
+      select: 'fullName phoneNumber email'
+    }
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user.receivedOrders, "Orders fetched"));
+});
+
+const approveOrder = asyncHandler(async (req, res) => {
+  const id = req.body.id;
+  const order = await Order.findById(id);
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+  order.approvalStatus = req.body.approvalStatus;
+  await order.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, {}, `Order ${req.body.approvalStatus} successfully`)
+    );
+});
 
 export {
   registerUser,
@@ -393,4 +424,6 @@ export {
   updateUserAvatar,
   forgotPassword,
   resetPassword,
+  getOrders,
+  approveOrder,
 };

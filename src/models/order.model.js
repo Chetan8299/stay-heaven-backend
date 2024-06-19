@@ -21,6 +21,15 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     trim: true,
   },
+  customer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  approvalStatus: {
+    type: String,
+    enum: ["in-progress", "confirmed", "cancelled"],
+    default: "in-progress",
+  }
 },{timestamps: true});
 
 export const Order = mongoose.model("Order", orderSchema);

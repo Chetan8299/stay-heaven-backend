@@ -41,7 +41,7 @@ const createHotel = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized request");
   }
 
-  if(!user.isCreator){
+  if (!user.isCreator) {
     throw new ApiError(400, "You cannot create a hotel for yourself");
   }
 
@@ -56,6 +56,7 @@ const createHotel = asyncHandler(async (req, res) => {
     state,
     pinCode,
     images,
+    owner: req.user?._id,
   });
 
   const createdHotel = await Hotel.findById(hotel._id);
@@ -133,7 +134,7 @@ const editHotel = asyncHandler(async (req, res) => {
 
 const fetchAllHotels = asyncHandler(async (req, res) => {
   const hotels = await Hotel.find({
-    approvalStatus: "approved"
+    approvalStatus: "approved",
   });
   return res
     .status(200)
@@ -142,15 +143,14 @@ const fetchAllHotels = asyncHandler(async (req, res) => {
 
 const getHotelDetails = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const hotel = await Hotel.findById(id)
-    .populate({
-      path: 'comments',
-      populate: {
-        path: 'user',
-        model: 'User',
-        select: 'username avatar fullName'
-      }
-    });
+  const hotel = await Hotel.findById(id).populate({
+    path: "comments",
+    populate: {
+      path: "user",
+      model: "User",
+      select: "username avatar fullName",
+    },
+  });
   if (!hotel) {
     throw new ApiError(404, "Hotel not found");
   }
@@ -162,21 +162,16 @@ const getHotelDetails = asyncHandler(async (req, res) => {
 });
 
 const myPreviousBooking = asyncHandler(async (req, res) => {
-  const { id } = req.body;
-  const user = await User.findById(req.user?._id);
+  const user = await User.findById(req.user?._id).populate("previousBookings"); 
   if (!user) {
     throw new ApiError(401, "Unauthorized request");
   }
-
-  user.previousBookings.push(id);
-  user.save();
-
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        {},
+        user.previousBookings,
         "Hotel Added to my previous bookings successfully"
       )
     );
@@ -191,7 +186,13 @@ const myCreatedPlaces = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user.myCreatedPlaces, "My created places fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        user.myCreatedPlaces,
+        "My created places fetched successfully"
+      )
+    );
 });
 
 const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
@@ -206,23 +207,26 @@ const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
 
   const idStr = id.toString();
 
-  user.myCreatedPlaces = user.myCreatedPlaces.filter(hotel => hotel.toString() !== idStr);
+  user.myCreatedPlaces = user.myCreatedPlaces.filter(
+    (hotel) => hotel.toString() !== idStr
+  );
 
   await user.save();
 
-  return res.status(200).json(new ApiResponse(200, {}, "Hotel deleted successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Hotel deleted successfully"));
 });
-
 
 const searchHotel = asyncHandler(async (req, res) => {
   const { soda, cocaCola, searchterm } = req.query;
 
   const baseQuery = {
     $or: [
-      { title: { $regex: new RegExp(searchterm, 'i') } },
-      { city: { $regex: new RegExp(`\\b${searchterm}\\b`, 'i') } },
-      { state: { $regex: new RegExp(`\\b${searchterm}\\b`, 'i') } }
-    ]
+      { title: { $regex: new RegExp(searchterm, "i") } },
+      { city: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+      { state: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+    ],
   };
 
   const additionalQueries = [];
@@ -235,34 +239,51 @@ const searchHotel = asyncHandler(async (req, res) => {
     additionalQueries.push({ facilities: { $regex: /coca\s*cola/i } });
   }
 
-  const finalQuery = additionalQueries.length > 0
-    ? { $and: [baseQuery, ...additionalQueries] }
-    : baseQuery;
+  const finalQuery =
+    additionalQueries.length > 0
+      ? { $and: [baseQuery, ...additionalQueries] }
+      : baseQuery;
 
-  const sort = req.query.sort || 'createdAt';
-  const order = req.query.order || 'desc';
+  const sort = req.query.sort || "createdAt";
+  const order = req.query.order || "desc";
 
   const hotels = await Hotel.find(finalQuery).sort({ [sort]: order });
 
-  return res.status(200).json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
 });
 
 const orderHotel = asyncHandler(async (req, res) => {
-  const {hotelId, checkin, checkout, rooms, amount, userId} = req.body;
+  const { hotelId, checkin, checkout, rooms, amount, userId } = req.body;
 
   const order = await Order.create({
     hotelId,
     checkin,
     checkout,
     rooms,
-    amount
-  })
+    amount,
+    customer: userId
+  });
   const user = await User.findById(userId);
   user.previousBookings.push(order._id);
   user.save();
 
-  return res.status(200).json( new ApiResponse(200, {}, "Order created successfully") );
-})
+  const { owner } = await Hotel.findById(hotelId);
+
+  const ownerUser = await User.findById(owner);
+
+  if (!ownerUser) {
+    throw new ApiError(404, "Owner not found");
+  }
+
+  ownerUser.receivedOrders.push(order._id);
+  ownerUser.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Order created successfully"));
+});
 
 export {
   createHotel,
