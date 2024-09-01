@@ -23,10 +23,10 @@ import utilsRoutes from "./routes/utils.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/hotel", hotelRoutes);
-app.use("/api/v1/utils", utilsRoutes);
-app.use("/api/v1/comment", commentRoutes);
-app.use("/api/v1/admin", adminRoutes);
+app.use("/user", userRoutes);
+app.use("/hotel", hotelRoutes);
+app.use("/utils", utilsRoutes);
+app.use("/comment", commentRoutes);
+app.use("/admin", adminRoutes);
 
 export { app };
