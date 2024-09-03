@@ -340,9 +340,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   var mailOptions = {
     from: "stayheaven123@gmail.com",
-    to: "aadijain1404a@gmail.com",
+    to: user?.email,
     subject: "Reset Password",
-    text: `Your password reset link is: https://localhost:8000/api/v1/user/reset-password/${user?._id}/${token}`,
+    text: `Your password reset link is: http://localhost:5173/resetPassword/${user?._id}/${token}`,
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -361,6 +361,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
+
 
   if (!password) {
     throw new ApiError(400, "Password is required");

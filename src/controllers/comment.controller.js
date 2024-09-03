@@ -38,10 +38,8 @@ const createComment = asyncHandler(async (req, res) => {
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
-
     const commentId = req.params.id;
     const comment = await Comment.findByIdAndDelete(commentId);
-
     const hotelId = req.body.hotelId;
 
     const hotel = await Hotel.findById(hotelId)
