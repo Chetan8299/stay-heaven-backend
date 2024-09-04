@@ -22,6 +22,9 @@ const createComment = asyncHandler(async (req, res) => {
         message,
         rating
     });
+    const newComment = await Comment.findById(comment._id).populate({ path: "user",
+        model: "User",
+        select: "username avatar fullName",});
 
     const hotelId = req.params.id;
 
@@ -34,14 +37,13 @@ const createComment = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, comment, "Comment created successfully"));
+        .json(new ApiResponse(200, newComment, "Comment created successfully"));
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
     const commentId = req.params.id;
     const comment = await Comment.findByIdAndDelete(commentId);
     const hotelId = req.body.hotelId;
-
     const hotel = await Hotel.findById(hotelId)
 
     if (!hotel) {

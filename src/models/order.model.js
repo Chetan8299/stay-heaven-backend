@@ -21,6 +21,9 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     trim: true,
   },
+  guests: [
+    {type: Object}
+  ],
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

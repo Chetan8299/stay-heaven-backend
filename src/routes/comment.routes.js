@@ -8,6 +8,6 @@ import {
 const router = Router();
 
 router.route("/create/:id").post(verifyJWT, createComment);
-router.route("/delete/:id").delete(verifyJWT, deleteComment);
+router.route("/delete/:id").post(verifyJWT, deleteComment);
 
 export default router;
