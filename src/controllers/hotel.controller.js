@@ -255,7 +255,7 @@ const searchHotel = asyncHandler(async (req, res) => {
 });
 
 const orderHotel = asyncHandler(async (req, res) => {
-  const { hotelId, checkin, checkout, rooms, amount, userId } = req.body;
+  const { hotelId, checkin, checkout, rooms, amount, userId, guests , paymentDetails } = req.body;
 
   const order = await Order.create({
     hotelId,
@@ -263,7 +263,8 @@ const orderHotel = asyncHandler(async (req, res) => {
     checkout,
     rooms,
     amount,
-    customer: userId
+    customer: userId,
+    guests , paymentDetails
   });
   const user = await User.findById(userId);
   user.previousBookings.push(order._id);

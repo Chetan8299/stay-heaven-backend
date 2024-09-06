@@ -21,9 +21,12 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     trim: true,
   },
-  guests: [
-    {type: Object}
-  ],
+  guests: {
+    type: Array,
+  },
+  paymentDetails: {
+    type: Object,
+  },
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

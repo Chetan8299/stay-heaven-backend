@@ -6,6 +6,6 @@ const router = Router();
 
 router.route("/checkout").post(verifyJWT, checkout);
 router.route("/paymentverification").post(verifyJWT, paymentverification);
-router.route("/getkey").get(verifyJWT, getkey);
+router.route("/getkey").post(verifyJWT, getkey);
 
 export default router;
