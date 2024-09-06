@@ -254,37 +254,6 @@ const searchHotel = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
 });
 
-const orderHotel = asyncHandler(async (req, res) => {
-  const { hotelId, checkin, checkout, rooms, amount, userId, guests , paymentDetails } = req.body;
-
-  const order = await Order.create({
-    hotelId,
-    checkin,
-    checkout,
-    rooms,
-    amount,
-    customer: userId,
-    guests , paymentDetails
-  });
-  const user = await User.findById(userId);
-  user.previousBookings.push(order._id);
-  user.save();
-
-  const { owner } = await Hotel.findById(hotelId);
-
-  const ownerUser = await User.findById(owner);
-
-  if (!ownerUser) {
-    throw new ApiError(404, "Owner not found");
-  }
-
-  ownerUser.receivedOrders.push(order._id);
-  ownerUser.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Order created successfully"));
-});
 
 export {
   createHotel,
@@ -295,5 +264,4 @@ export {
   myCreatedPlaces,
   searchHotel,
   deleteMyCreatedPlace,
-  orderHotel,
 };
