@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  hotelId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Hotel",
+  hotel: {
+    type: Object,
   },
   checkin: {
     type: String,
