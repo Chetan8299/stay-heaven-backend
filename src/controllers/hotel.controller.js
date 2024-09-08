@@ -219,7 +219,7 @@ const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
 });
 
 const searchHotel = asyncHandler(async (req, res) => {
-  const { soda, cocaCola, searchterm } = req.query;
+  const { tv, ac, breakfast, parking, kitchen, gym, searchterm } = req.query;
 
   const baseQuery = {
     $or: [
@@ -231,13 +231,25 @@ const searchHotel = asyncHandler(async (req, res) => {
 
   const additionalQueries = [];
 
-  if (soda) {
-    additionalQueries.push({ facilities: { $regex: /soda/i } });
+  if (tv) {
+    additionalQueries.push({ facilities: { $regex: /tv/i } });
+  }
+  if (ac) {
+    additionalQueries.push({ facilities: { $regex: /ac/i } });
+  }
+  if (breakfast) {
+    additionalQueries.push({ facilities: { $regex: /breakfast/i } });
+  }
+  if (parking) {
+    additionalQueries.push({ facilities: { $regex: /parking/i } });
+  }
+  if (kitchen) {
+    additionalQueries.push({ facilities: { $regex: /kitchen/i } });
+  }
+  if (gym) {
+    additionalQueries.push({ facilities: { $regex: /gym/i } });
   }
 
-  if (cocaCola) {
-    additionalQueries.push({ facilities: { $regex: /coca\s*cola/i } });
-  }
 
   const finalQuery =
     additionalQueries.length > 0
