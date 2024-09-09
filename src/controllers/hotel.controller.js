@@ -219,20 +219,25 @@ const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
 });
 
 const searchHotel = asyncHandler(async (req, res) => {
-  const { tv, ac, breakfast, parking, kitchen, gym, searchterm } = req.query;
+  const { wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price } = req.query;
+  const sort = req.query.sort;
+  const order = req.query.order;
 
-  const baseQuery = {
-    $or: [
-      { title: { $regex: new RegExp(searchterm, "i") } },
-      { city: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
-      { state: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
-    ],
-  };
+  let baseQuery = null;
+  if(searchterm){
+    baseQuery = {
+      $or: [
+        { title: { $regex: new RegExp(searchterm, "i") } },
+        { city: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+        { state: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+      ],
+    };
+  }
 
   const additionalQueries = [];
 
-  if (tv) {
-    additionalQueries.push({ facilities: { $regex: /tv/i } });
+  if (wifi) {
+    additionalQueries.push({ facilities: { $regex: /wifi/i } });
   }
   if (ac) {
     additionalQueries.push({ facilities: { $regex: /ac/i } });
@@ -250,16 +255,32 @@ const searchHotel = asyncHandler(async (req, res) => {
     additionalQueries.push({ facilities: { $regex: /gym/i } });
   }
 
+  
+    const priceQuery = {};
+    if (min_price) priceQuery.$gte = min_price;
+    if (max_price) priceQuery.$lte = max_price;
+    additionalQueries.push({ price: priceQuery });
+  
 
-  const finalQuery =
-    additionalQueries.length > 0
-      ? { $and: [baseQuery, ...additionalQueries] }
-      : baseQuery;
+  let finalQuery;
+  if(additionalQueries.length > 0 && baseQuery){
+    finalQuery = { $and: [baseQuery, ...additionalQueries] };
+  }
+  else if(additionalQueries.length > 0){
+    finalQuery = { $and: [...additionalQueries] };
+  }
+  else if(baseQuery){
+    finalQuery = baseQuery;
+  }
 
-  const sort = req.query.sort || "createdAt";
-  const order = req.query.order || "desc";
-
-  const hotels = await Hotel.find(finalQuery).sort({ [sort]: order });
+  let hotels;
+  if(sort && order){
+    hotels = await Hotel.find(finalQuery?finalQuery:null).sort({ [sort]: order });
+  }
+  else{
+    hotels = await Hotel.find(finalQuery?finalQuery:null);
+  }
+  
 
   return res
     .status(200)
