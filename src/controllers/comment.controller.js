@@ -28,12 +28,20 @@ const createComment = asyncHandler(async (req, res) => {
 
     const hotelId = req.params.id;
 
-    const hotel = await Hotel.findByIdAndUpdate(hotelId, {
+    let hotel = await Hotel.findByIdAndUpdate(hotelId, {
         $push: {
             comments: comment._id
         }
     })
     hotel.save()
+
+    hotel = await Hotel.findById(hotelId).populate({ path: "comments",
+        model: "Comment"});
+
+    const totalRating = hotel.comments.reduce((acc, cur) => acc + cur.rating, 0);
+    hotel.rating = totalRating / hotel.comments.length;
+    hotel.save()
+
 
     return res
         .status(200)

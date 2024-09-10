@@ -8,7 +8,10 @@ import {
   makeAdmin,
   banUser,
   allOrders,
-  removeAdmin
+  removeAdmin,
+  removeCreator,
+  makeCreator,
+  unbanUser
 } from "../controllers/admin.controller.js";
 
 const router = Router();
@@ -20,6 +23,9 @@ router.route("/all-orders").post(verifyJWT, verifyAdmin, allOrders);
 router.route("/all-users").post(verifyJWT, verifyAdmin, getAllUsers);
 router.route("/make-admin").post(verifyJWT, verifyAdmin, makeAdmin);
 router.route("/remove-admin").post(verifyJWT, verifyAdmin, removeAdmin);
+router.route("/make-creator").post(verifyJWT, verifyAdmin, makeCreator);
+router.route("/remove-creator").post(verifyJWT, verifyAdmin, removeCreator);
 router.route("/ban-user").post(verifyJWT, verifyAdmin, banUser);
+router.route("/unban-user").post(verifyJWT, verifyAdmin, unbanUser);
 
 export default router;

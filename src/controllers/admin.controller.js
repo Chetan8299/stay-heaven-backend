@@ -67,6 +67,32 @@ const makeAdmin = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "User made admin successfully"));
 });
+const makeCreator = asyncHandler(async (req, res) => {
+  const id = req.body.id;
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  user.isCreator = true;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User made creator successfully"));
+});
+const removeCreator = asyncHandler(async (req, res) => {
+  const id = req.body.id;
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  user.isCreator = false;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User removed creator successfully"));
+});
 
 const removeAdmin = asyncHandler(async (req, res) => {
   const id = req.body.id;
@@ -88,7 +114,20 @@ const banUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  user.isCreator = false;
+  user.isban = true;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User banned successfully"));
+});
+const unbanUser = asyncHandler(async (req, res) => {
+  const id = req.body.id;
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  user.isban = false;
   await user.save();
 
   return res
@@ -110,6 +149,9 @@ export {
   getAllUsers,
   makeAdmin,
   removeAdmin,
+  makeCreator,
+  removeCreator,
   banUser,
+  unbanUser,
   allOrders,
 };

@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isban: {
+      type: Boolean,
+      default: false,
+    },
     receivedOrders:[
       {
         type: mongoose.Schema.Types.ObjectId,
