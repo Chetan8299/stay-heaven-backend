@@ -254,6 +254,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+  if(!req.user) {
+    console.log("not logged in")
+    return res.status(401).json(new ApiError(401, "Unauthorized request"));
+  }
   const user = await User.findById(req.user?._id)
     .populate("myCreatedPlaces")
     .populate("previousBookings");
