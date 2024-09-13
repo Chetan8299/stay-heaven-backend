@@ -11,12 +11,14 @@ import {
   removeAdmin,
   removeCreator,
   makeCreator,
-  unbanUser
+  unbanUser,
+  getAllPendingHotels
 } from "../controllers/admin.controller.js";
 
 const router = Router();
 
 router.route("/all-hotels").post(verifyJWT, verifyAdmin, getAllHotels);
+router.route("/all-pending-hotels").post(verifyJWT, verifyAdmin, getAllPendingHotels);
 router.route("/hotel-approval").post(verifyJWT, verifyAdmin, approveHotel);
 router.route("/hotel-remove").post(verifyJWT, verifyAdmin, removeHotel);
 router.route("/all-orders").post(verifyJWT, verifyAdmin, allOrders);

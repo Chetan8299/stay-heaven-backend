@@ -13,6 +13,13 @@ const getAllHotels = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
 });
 
+const getAllPendingHotels = asyncHandler(async (req, res) => {
+  const hotels = await Hotel.find({ approvalStatus: "pending" }).populate("owner");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
+});
+
 const approveHotel = asyncHandler(async (req, res) => {
   const id = req.body.id;
   const hotel = await Hotel.findById(id);
@@ -139,7 +146,7 @@ const unbanUser = asyncHandler(async (req, res) => {
 });
 
 const allOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find().populate("hotelId").populate("customer");
+  const orders = await Order.find().populate("customer");
   return res
     .status(200)
     .json(new ApiResponse(200, { orders }, "Orders fetched successfully"));
@@ -157,4 +164,5 @@ export {
   banUser,
   unbanUser,
   allOrders,
+  getAllPendingHotels
 };
