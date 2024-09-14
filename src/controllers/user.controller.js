@@ -7,6 +7,7 @@ import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Order } from "../models/order.model.js";
+import { io } from "../app.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -76,6 +77,8 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering user");
   }
+
+  io.emit("user_is_created", { user: createdUser });
 
   return res
     .status(201)

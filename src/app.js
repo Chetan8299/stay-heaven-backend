@@ -1,8 +1,17 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  },
+});
 
 app.use(
   cors({
@@ -31,4 +40,4 @@ app.use("/comment", commentRoutes);
 app.use("/admin", adminRoutes);
 app.use("/payment", paymentRoutes);
 
-export { app };
+export { app,server,io };

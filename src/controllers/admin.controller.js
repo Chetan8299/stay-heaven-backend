@@ -5,6 +5,7 @@ import { Hotel } from "../models/hotel.model.js";
 import { User } from "../models/user.model.js";
 import { Order } from "./../models/order.model.js";
 import { myCreatedPlaces } from "./hotel.controller.js";
+import { io } from "../app.js";
 
 const getAllHotels = asyncHandler(async (req, res) => {
   const hotels = await Hotel.find();
@@ -28,7 +29,7 @@ const approveHotel = asyncHandler(async (req, res) => {
   }
   hotel.approvalStatus = req.body.approvalStatus;
   await hotel.save();
-
+  io.emit("hotel_is_approved", { hotel: hotel });
   return res
     .status(200)
     .json(

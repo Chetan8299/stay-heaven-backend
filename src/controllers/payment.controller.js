@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { Order } from "../models/order.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
+import { io } from "../app.js";
 
 const instance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -71,6 +72,7 @@ const paymentverification = asyncHandler(async (req,res) => {
         
         ownerUser.receivedOrders.push(order._id);
         ownerUser.save();
+        io.emit("order_is_created", { order: order });
         res.redirect(`${process.env.FRONTEND_URL}/success`);
     }   else {
         return res.status(400).json(new ApiResponse(400, {  }, "Payment initiated Failed"));

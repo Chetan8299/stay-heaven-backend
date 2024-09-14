@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Hotel } from "../models/hotel.model.js";
 import mongoose from "mongoose";
 import { Order } from "../models/order.model.js";
+import { io } from "../app.js";
 
 const createHotel = asyncHandler(async (req, res) => {
   const {
@@ -66,6 +67,10 @@ const createHotel = asyncHandler(async (req, res) => {
   }
   user.myCreatedPlaces.push(createdHotel._id);
   user.save();
+
+  
+  io.emit("hotel_is_created", { hotel: createdHotel });
+
 
   return res
     .status(200)
