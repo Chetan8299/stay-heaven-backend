@@ -152,6 +152,40 @@ const allOrders = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { orders }, "Orders fetched successfully"));
 });
 
+const getAdminDashboardData = asyncHandler(async (req, res) => {
+  const { duration } = req.body;
+
+  const now = new Date();
+
+  let dateFilter = {};
+
+  if (duration === 'This Week') {
+    const last7Days = new Date(now); 
+    last7Days.setDate(now.getDate() - 7);
+    dateFilter = { createdAt: { $gte: last7Days } };
+  } else if (duration === 'This Month') {
+    const last30Days = new Date(now); 
+    last30Days.setDate(now.getDate() - 30); 
+    dateFilter = { createdAt: { $gte: last30Days } };
+  } else if (duration === 'This Year') {
+    const last365Days = new Date(now);
+    last365Days.setDate(now.getDate() - 365);
+    dateFilter = { createdAt: { $gte: last365Days } };
+  }
+
+  const orders = await Order.find(dateFilter);
+  const users = await User.find(dateFilter);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { orders, users }, "Orders and users fetched successfully")
+    );
+});
+
+
+
+
 export {
   getAllHotels,
   approveHotel,
@@ -164,5 +198,6 @@ export {
   banUser,
   unbanUser,
   allOrders,
-  getAllPendingHotels
+  getAllPendingHotels,
+  getAdminDashboardData
 };

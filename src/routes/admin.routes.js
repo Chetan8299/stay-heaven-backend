@@ -12,7 +12,8 @@ import {
   removeCreator,
   makeCreator,
   unbanUser,
-  getAllPendingHotels
+  getAllPendingHotels,
+  getAdminDashboardData
 } from "../controllers/admin.controller.js";
 
 const router = Router();
@@ -29,5 +30,6 @@ router.route("/make-creator").post(verifyJWT, verifyAdmin, makeCreator);
 router.route("/remove-creator").post(verifyJWT, verifyAdmin, removeCreator);
 router.route("/ban-user").post(verifyJWT, verifyAdmin, banUser);
 router.route("/unban-user").post(verifyJWT, verifyAdmin, unbanUser);
+router.route("/admin-dashboard").post(verifyJWT, verifyAdmin, getAdminDashboardData);
 
 export default router;
