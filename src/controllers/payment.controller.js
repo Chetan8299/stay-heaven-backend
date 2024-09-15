@@ -69,7 +69,6 @@ const paymentverification = asyncHandler(async (req,res) => {
         if (!ownerUser) {
             throw new ApiError(404, "Owner not found");
         }
-        
         ownerUser.receivedOrders.push(order._id);
         ownerUser.save();
         io.emit("order_is_created", { order: order });
