@@ -8,7 +8,7 @@ import { myCreatedPlaces } from "./hotel.controller.js";
 import { io } from "../app.js";
 
 const getAllHotels = asyncHandler(async (req, res) => {
-  const hotels = await Hotel.find();
+  const hotels = await Hotel.find().populate("owner");
   return res
     .status(200)
     .json(new ApiResponse(200, { hotels }, "Hotels fetched successfully"));
