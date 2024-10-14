@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Order } from "../models/order.model.js";
 import { io } from "../app.js";
+import { Hotel } from "../models/hotel.model.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -406,7 +407,7 @@ const getOrders = asyncHandler(async (req, res) => {
   });
   return res
     .status(200)
-    .json(new ApiResponse(200, user.receivedOrders, "Orders fetched"));
+    .json(new ApiResponse(200, {orders:user.receivedOrders}, "Orders fetched"));
 });
 
 const approveOrder = asyncHandler(async (req, res) => {
@@ -415,9 +416,16 @@ const approveOrder = asyncHandler(async (req, res) => {
   if (!order) {
     throw new ApiError(404, "Order not found");
   }
+  console.log(order);
   order.approvalStatus = req.body.approvalStatus;
+  console.log(order.approvalStatus);
+  if(order.approvalStatus === "confirmed") {
+    const hotel = await Hotel.findById(order.hotel._id);
+    console.log(order.amount)
+    hotel.revenue += order.amount - 0.05 * order.amount;
+    await hotel.save();
+  }
   await order.save();
-
   return res
     .status(200)
     .json(

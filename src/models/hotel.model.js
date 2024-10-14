@@ -62,6 +62,13 @@ const hotelSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
+  },
+  revenue: {
+    type: Number,
+    default: 0,
+  },
+  pdf: {
+    type: String
   }
 }, {timestamps: true});
 

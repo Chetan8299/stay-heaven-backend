@@ -20,6 +20,7 @@ const createHotel = asyncHandler(async (req, res) => {
     state,
     pinCode,
     images,
+    pdf
   } = req.body;
 
   if (
@@ -31,7 +32,8 @@ const createHotel = asyncHandler(async (req, res) => {
     !maxGuests ||
     !city ||
     !state ||
-    !pinCode
+    !pinCode ||
+    !pdf
   ) {
     throw new ApiError(400, "All fields are required");
   }
@@ -58,6 +60,7 @@ const createHotel = asyncHandler(async (req, res) => {
     pinCode,
     images,
     owner: req.user?._id,
+    pdf: pdf
   });
 
   const createdHotel = await Hotel.findById(hotel._id);
