@@ -267,7 +267,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   .populate("previousBookings")
   .populate("receivedOrders");
   
-  console.log(user)
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Current user fetched successfully"));
@@ -416,20 +415,69 @@ const approveOrder = asyncHandler(async (req, res) => {
   if (!order) {
     throw new ApiError(404, "Order not found");
   }
-  console.log(order);
   order.approvalStatus = req.body.approvalStatus;
-  console.log(order.approvalStatus);
   if(order.approvalStatus === "confirmed") {
     const hotel = await Hotel.findById(order.hotel._id);
-    console.log(order.amount)
     hotel.revenue += order.amount - 0.05 * order.amount;
     await hotel.save();
-  }
+  } 
+  io.emit("order_approved_or_rejected", { order: order});
   await order.save();
   return res
     .status(200)
     .json(
       new ApiResponse(200, {}, `Order ${req.body.approvalStatus} successfully`)
+    );
+});
+
+const getSellerDashBoardData = asyncHandler(async (req, res) => {
+  console.log()
+  const { duration } = req.body;
+
+  const now = new Date();
+
+  let dateFilter = {};
+
+  if (duration === 'This Week') {
+    const last7Days = new Date(now); 
+    last7Days.setDate(now.getDate() - 7);
+    dateFilter = { createdAt: { $gte: last7Days } };
+  } else if (duration === 'This Month') {
+    const last30Days = new Date(now); 
+    last30Days.setDate(now.getDate() - 30); 
+    dateFilter = { createdAt: { $gte: last30Days } };
+  } else if (duration === 'This Year') {
+    const last365Days = new Date(now);
+    last365Days.setDate(now.getDate() - 365);
+    dateFilter = { createdAt: { $gte: last365Days } };
+  }
+
+  const user = await User.findById(req.user?._id)
+    .populate({
+      path: 'myCreatedPlaces',
+      match: dateFilter, 
+    })
+    .populate({
+      path: 'previousBookings',
+      match: dateFilter, 
+    })
+    .populate({
+      path: 'receivedOrders',
+      match: dateFilter, 
+    });
+
+    const totalBookings = user.previousBookings?.length || 0;
+    const totalCreatedPlaces = user.myCreatedPlaces?.length || 0;
+    const totalRevenue = user.receivedOrders?.reduce((acc, order) => order.approvalStatus === "confirmed" ? acc + order.amount: acc, 0)
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { totalBookings,
+        totalCreatedPlaces,
+        totalRevenue,
+        receivedOrders: user.receivedOrders
+         }, "Orders and users fetched successfully")
     );
 });
 
@@ -446,4 +494,5 @@ export {
   resetPassword,
   getOrders,
   approveOrder,
+  getSellerDashBoardData
 };
