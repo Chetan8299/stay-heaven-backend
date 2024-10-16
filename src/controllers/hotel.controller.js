@@ -287,6 +287,7 @@ const searchHotel = asyncHandler(async (req, res) => {
   }
   else{
     hotels = await Hotel.find(finalQuery?finalQuery:null);
+    console.log(hotels);
   }
   
 

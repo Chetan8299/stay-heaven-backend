@@ -421,7 +421,7 @@ const approveOrder = asyncHandler(async (req, res) => {
     hotel.revenue += order.amount - 0.05 * order.amount;
     await hotel.save();
   } 
-  io.emit("order_approved_or_rejected", { order: order});
+
   await order.save();
   return res
     .status(200)
