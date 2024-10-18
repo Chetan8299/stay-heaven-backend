@@ -9,6 +9,8 @@ import {
   myPreviousBooking,
   searchHotel,
   deleteMyCreatedPlace,
+  deleteRequest,
+  undoDeleteRequest,
 } from "../controllers/hotel.controller.js";
 
 const router = Router();
@@ -19,7 +21,9 @@ router.route("/:id").get(getHotelDetails);
 router.route("/edit/:id").put(verifyJWT, editHotel);
 router.route("/my-previous-booking").post(verifyJWT, myPreviousBooking);
 router.route("/my-created-places").post(verifyJWT, myCreatedPlaces);
-router.route("/my-created-places/:id").delete(verifyJWT, deleteMyCreatedPlace);
+router.route("/delete-my-created-places").post(verifyJWT, deleteMyCreatedPlace);
 router.route("/search").post(searchHotel)
+router.route("/delete-request").post(verifyJWT, deleteRequest);
+router.route("/undo-delete-request").post(verifyJWT, undoDeleteRequest);
 
 export default router;

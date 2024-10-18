@@ -13,6 +13,7 @@ import {
   approveOrder,
   getOrders,
   getSellerDashBoardData,
+  getSellerData,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -31,6 +32,7 @@ router.route("/reset-password/:id/:token").post(resetPassword);
 router.route("/get-orders").post(verifyJWT, getOrders); 
 router.route("/approve-order").post(verifyJWT, approveOrder); 
 router.route("/get-seller-dashboard-data").post(verifyJWT, getSellerDashBoardData);
+router.route("/get-seller-data").post(verifyJWT, getSellerData);
 
 router
   .route("/avatar")

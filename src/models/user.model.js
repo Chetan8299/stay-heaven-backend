@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema(
     },
     isCreator: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     isban: {
       type: Boolean,
@@ -75,6 +75,19 @@ const userSchema = new mongoose.Schema(
         ref: "Order",
       },
     ],
+    sellerRequestMade: {
+      type: Boolean,
+      default: false
+    },
+    aadhaar: {
+      type: String
+    },
+    pan: {
+      type: String
+    },
+    address: {
+      type: String
+    }
   },
   { timestamps: true }
 );

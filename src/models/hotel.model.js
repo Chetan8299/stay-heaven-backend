@@ -69,6 +69,14 @@ const hotelSchema = new mongoose.Schema({
   },
   pdf: {
     type: String
+  },
+  deleted: {
+    type: Boolean,
+    default: false,
+  },
+  deleteReason: {
+    type: String,
+    default: ""
   }
 }, {timestamps: true});
 

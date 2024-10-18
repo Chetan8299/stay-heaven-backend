@@ -481,6 +481,31 @@ const getSellerDashBoardData = asyncHandler(async (req, res) => {
     );
 });
 
+const getSellerData = asyncHandler(async (req, res) => {
+  const {address, aadhaar, pan} = req.body;
+  console.log(address, aadhaar, pan)
+  if(!address || !aadhaar || !pan) {
+    throw new ApiError(400, "All fields are required");
+  }
+  
+  const user = await User.findById(req.user?._id)
+
+  if(!user) {
+    throw new ApiError(401, "Unauthorized request");
+  }
+
+  user.aadhaar = aadhaar;
+  user.pan = pan;
+  user.address = address;
+  user.sellerRequestMade = true,
+  await user.save();
+
+
+  io.emit("seller_request_made", {seller: user});
+
+  return res.status(200).json(new ApiResponse(200, {user}, "Seller data updated successfully"));
+})
+
 export {
   registerUser,
   loginUser,
@@ -494,5 +519,6 @@ export {
   resetPassword,
   getOrders,
   approveOrder,
-  getSellerDashBoardData
+  getSellerDashBoardData,
+  getSellerData
 };

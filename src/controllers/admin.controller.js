@@ -78,6 +78,7 @@ const makeAdmin = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "User made admin successfully"));
 });
+
 const makeCreator = asyncHandler(async (req, res) => {
   const id = req.body.id;
   const user = await User.findById(id);
@@ -86,11 +87,32 @@ const makeCreator = asyncHandler(async (req, res) => {
   }
   user.isCreator = true;
   await user.save();
-
+  io.emit("seller_made", { seller: user });
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "User made creator successfully"));
 });
+
+const rejectSeller = asyncHandler(async (req, res) => {
+  console.log("entered")
+  const id = req.body.id;
+  console.log(id, "id")
+  const user = await User.findById(id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  user.sellerRequestMade = false;
+  user.aadhaar = "";
+  user.pan = "";
+  user.address = "";
+  await user.save();
+  io.emit("rejected_seller", { seller: user });
+  console.log("finishesd", user)
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User rejected seller request successfully"));
+});
+
 const removeCreator = asyncHandler(async (req, res) => {
   const id = req.body.id;
   const user = await User.findById(id);
@@ -98,7 +120,12 @@ const removeCreator = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
   user.isCreator = false;
+  user.sellerRequestMade = false;
+  user.aadhaar = "";
+  user.pan = "";
+  user.address = "";
   await user.save();
+  io.emit("remove_creator", { seller: user });
 
   return res
     .status(200)
@@ -200,5 +227,6 @@ export {
   unbanUser,
   allOrders,
   getAllPendingHotels,
-  getAdminDashboardData
+  getAdminDashboardData,
+  rejectSeller
 };

@@ -204,7 +204,7 @@ const myCreatedPlaces = asyncHandler(async (req, res) => {
 });
 
 const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
-  let { id } = req.params;
+  let { id } = req.body;
   await Hotel.findByIdAndDelete(id);
 
   const user = await User.findById(req.user?._id);
@@ -213,18 +213,61 @@ const deleteMyCreatedPlace = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized request");
   }
 
-  const idStr = id.toString();
+
 
   user.myCreatedPlaces = user.myCreatedPlaces.filter(
-    (hotel) => hotel.toString() !== idStr
+    (hotel) => hotel._id !== id
   );
 
   await user.save();
+
+  io.emit("hotel_deleted", id)
 
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Hotel deleted successfully"));
 });
+
+const deleteRequest = asyncHandler(async (req, res) => {
+  const { id, reason } = req.body;
+
+  const hotel = await Hotel.findById(id).populate("owner");
+  if (!hotel) {
+    throw new ApiError(404, "Hotel not found");
+  }
+
+  hotel.deleteReason = reason;
+  hotel.deleted = true;
+  await hotel.save();
+  
+  io.emit("hotel_delete_req_sent", { hotel: hotel });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Hotel delete request sent successfully"));
+});
+
+const undoDeleteRequest = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+
+  const hotel = await Hotel.findById(id);
+  if (!hotel) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, {}, "Hotel not found"));
+  }
+
+  hotel.deleted = false;
+  hotel.deleteReason = "";
+  await hotel.save();
+
+  io.emit("delete_request_undone", { hotel: hotel });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Delete request undone successfully"));
+})
+
+
 
 const searchHotel = asyncHandler(async (req, res) => {
   const { wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price } = req.query;
@@ -306,4 +349,6 @@ export {
   myCreatedPlaces,
   searchHotel,
   deleteMyCreatedPlace,
+  deleteRequest,
+  undoDeleteRequest
 };
