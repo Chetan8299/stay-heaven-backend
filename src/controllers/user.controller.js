@@ -1,7 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
@@ -9,6 +8,7 @@ import bcrypt from "bcrypt";
 import { Order } from "../models/order.model.js";
 import { io } from "../app.js";
 import { Hotel } from "../models/hotel.model.js";
+import { deleteFileFromCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -278,6 +278,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
+  const userurl = await User.findById(req.user?._id);
+  await deleteFileFromCloudinary(userurl.avatar);
+  
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -299,6 +302,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const { avatar } = req.body;
+
+  const userurl = await User.findById(req.user?._id);
+  await deleteFileFromCloudinary(userurl.avatar);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -431,7 +437,6 @@ const approveOrder = asyncHandler(async (req, res) => {
 });
 
 const getSellerDashBoardData = asyncHandler(async (req, res) => {
-  console.log()
   const { duration } = req.body;
 
   const now = new Date();

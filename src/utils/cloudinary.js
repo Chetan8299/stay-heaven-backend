@@ -1,51 +1,52 @@
-import { v2 as cloudinary } from "cloudinary";
-import fs from "fs";
+import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
+
+dotenv.config({ path:"../../.env" });
 
 cloudinary.config({
-  cloud_name: `${process.env.CLOUDINARY_CLOUD_NAME}`,
-  api_key: `${process.env.CLOUDINARY_API_KEY}`,
-  api_secret: `${process.env.CLOUDINARY_API_SECRET}`,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const checkIfResourceExists = async (publicId) => {
   try {
-    if (!localFilePath) return null;
-    // upload the file on cloudinary
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
-    });
-    // file has been uploaded successfully
-    // console.log("file is uploaded on cloudinary", response.url)
-    // fs.unlinkSync(localFilePath)
-    return response;
+    const resource = await cloudinary.api.resource(publicId);
+
+    return {
+      exists: true,
+      resource
+    };
   } catch (error) {
-    // fs.unlinkSync(localFilePath) // remove the locally saved temporary file as the upload operation failed
-    return null;
+    if (error.http_code === 404) {
+      return { exists: false, message: 'Resource not found' };
+    }
+
+    return { exists: false, message: 'An error occurred', error };
   }
 };
 
-const deleteOnCloudinary = async (url) => {
-  try {
-    const publicId = extractPublicId(url);
-    console.log("publicId", publicId);
-
-    await cloudinary.uploader.destroy(publicId, function (error, result) {
-      if (error) {
-        console.error("Error deleting image:", error);
-      } else {
-        console.log("Image deleted successfully:", result);
-      }
-    });
-  } catch (error) {
-    return null;
-  }
-};
-
-function extractPublicId(url) {
-  const urlParts = url.split("/");
-  const publicIdWithExtension = urlParts.pop();
-  const publicId = publicIdWithExtension.split(".")[0];
+const extractPublicIdFromUrl = (url) => {
+  const parts = url.split('/');
+  const versionIndex = parts.findIndex((part) => part.startsWith('v'));
+  const publicIdWithExtension = parts.slice(versionIndex + 1).join('/');
+  const publicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf('.'));
   return publicId;
-}
+};
 
-export { uploadOnCloudinary, deleteOnCloudinary };
+export const deleteFileFromCloudinary = async (fileUrl, resourceType = 'image') => {
+  try {
+    const publicId = extractPublicIdFromUrl(fileUrl);
+    console.log('File URL:', fileUrl);
+
+    const resourceExists = await checkIfResourceExists(publicId);
+
+    if (resourceExists.exists) {
+      const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+    } else {
+      console.error(resourceExists.message);
+    }
+  } catch (error) {
+    console.error('Error deleting file from Cloudinary:', error);
+  }
+};

@@ -6,6 +6,7 @@ import { User } from "../models/user.model.js";
 import { Order } from "./../models/order.model.js";
 import { myCreatedPlaces } from "./hotel.controller.js";
 import { io } from "../app.js";
+import { deleteFileFromCloudinary } from '../utils/cloudinary.js';
 
 const getAllHotels = asyncHandler(async (req, res) => {
   const hotels = await Hotel.find().populate("owner");
@@ -94,20 +95,20 @@ const makeCreator = asyncHandler(async (req, res) => {
 });
 
 const rejectSeller = asyncHandler(async (req, res) => {
-  console.log("entered")
   const id = req.body.id;
-  console.log(id, "id")
   const user = await User.findById(id);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
+  const result1 = await deleteFileFromCloudinary(user.aadhaar);
+  const result2 = await deleteFileFromCloudinary(user.pan);
+  
   user.sellerRequestMade = false;
   user.aadhaar = "";
   user.pan = "";
   user.address = "";
   await user.save();
   io.emit("rejected_seller", { seller: user });
-  console.log("finishesd", user)
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "User rejected seller request successfully"));
@@ -119,6 +120,9 @@ const removeCreator = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(404, "User not found");
   }
+
+  const result1 = await deleteFileFromCloudinary(user.aadhaar);
+  const result2 = await deleteFileFromCloudinary(user.pan);
   user.isCreator = false;
   user.sellerRequestMade = false;
   user.aadhaar = "";
