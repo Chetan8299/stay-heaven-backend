@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     previousBookings: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Order",
+        generateAccessToken: "Order",
       },
     ],
     myCreatedPlaces: [
@@ -51,10 +51,6 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       required: true,
-      trim: true,
-    },
-    refreshToken: {
-      type: String,
       trim: true,
     },
     isAdmin:{
@@ -88,6 +84,11 @@ const userSchema = new mongoose.Schema(
     address: {
       type: String
     }
+    ,
+    accessToken: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
@@ -118,16 +119,4 @@ userSchema.methods.generateAccessToken = function () {
     }
   );
 };
-userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign(
-    {
-      _id: this._id,
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-    }
-  );
-};
-
 export const User = mongoose.model("User", userSchema);
