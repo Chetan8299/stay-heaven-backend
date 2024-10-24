@@ -43,10 +43,6 @@ const createHotel = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized request");
   }
 
-  if (!user.isCreator) {
-    throw new ApiError(400, "You cannot create a hotel for yourself");
-  }
-
   const hotel = await Hotel.create({
     title,
     description,
