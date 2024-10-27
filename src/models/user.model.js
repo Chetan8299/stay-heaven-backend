@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema(
     previousBookings: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        generateAccessToken: "Order",
+        ref: "Order",
       },
     ],
     myCreatedPlaces: [
