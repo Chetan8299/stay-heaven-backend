@@ -49,6 +49,7 @@ const paymentverification = asyncHandler(async (req,res) => {
     
     const isAuthentic = expectedSignature === razorpay_signature;
     if(isAuthentic) {
+        console.log("authentic", orderDetails)
         const hotel = await Hotel.findById(orderDetails.hotelId);
         const order = await Order.create({
             hotel,
