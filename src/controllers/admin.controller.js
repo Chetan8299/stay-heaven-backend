@@ -40,6 +40,13 @@ const approveHotel = asyncHandler(async (req, res) => {
 
 const removeHotel = asyncHandler(async (req, res) => {
   const id = req.body.id;
+
+  const hotel = await Hotel.findOne({ _id: id });
+
+  hotel.images.forEach(async (img) => {
+    await deleteFileFromCloudinary(img);
+  })
+  
   await Hotel.findByIdAndDelete(id);
   const user = await User.findOne({
     myCreatedPlaces: {
