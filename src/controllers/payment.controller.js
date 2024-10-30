@@ -16,9 +16,11 @@ const instance = new Razorpay({
 
 let orderDetails;
 const checkout = asyncHandler(async (req,res) => {
+    console.log("1")
     const { rooms, days, hotelId } = req.body;
+    console.log("2", hotelID)
     const hotel = await Hotel.findById(hotelId);
-
+    console.log("3")    
     if (!hotel) {
         throw new ApiError(404, "Hotel not found");
     }
