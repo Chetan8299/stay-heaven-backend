@@ -18,7 +18,7 @@ let orderDetails;
 const checkout = asyncHandler(async (req,res) => {
     console.log("1")
     const { rooms, days, hotelId } = req.body;
-    console.log("2", hotelID)
+    console.log("2", hotelId)
     const hotel = await Hotel.findById(hotelId);
     console.log("3")    
     if (!hotel) {
