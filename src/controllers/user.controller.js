@@ -488,6 +488,42 @@ const getSellerData = asyncHandler(async (req, res) => {
         );
 });
 
+const sendOTP = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const otp = Math.floor(Math.random() * 1000000);
+    if (!email) {
+        throw new ApiError(400, "Email is required");
+    }
+
+
+    var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "stayheaven123@gmail.com",
+            pass: `${process.env.MAIL_PASSWORD}`,
+        },
+    });
+
+    var mailOptions = {
+        from: "stayheaven123@gmail.com",
+        to: email,
+        subject: "OTP Verification - Stay Heaven",
+        text: `Your OTP is: ${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            return res
+                .status(400)
+                .json(new ApiError(400, "error sending mail"));
+        }
+    });
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {otp}, "OTP sent successfully"));
+});
+
 export {
     registerUser,
     loginUser,
@@ -502,4 +538,5 @@ export {
     approveOrder,
     getSellerDashBoardData,
     getSellerData,
+    sendOTP
 };

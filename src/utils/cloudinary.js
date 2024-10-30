@@ -37,7 +37,6 @@ const extractPublicIdFromUrl = (url) => {
 export const deleteFileFromCloudinary = async (fileUrl, resourceType = 'image') => {
   try {
     const publicId = extractPublicIdFromUrl(fileUrl);
-    console.log('File URL:', fileUrl);
 
     const resourceExists = await checkIfResourceExists(publicId);
 

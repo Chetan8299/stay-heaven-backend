@@ -13,8 +13,8 @@ import {
   getOrders,
   getSellerDashBoardData,
   getSellerData,
+  sendOTP,
 } from "../controllers/user.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -31,6 +31,7 @@ router.route("/get-orders").post(verifyJWT, getOrders);
 router.route("/approve-order").post(verifyJWT, approveOrder); 
 router.route("/get-seller-dashboard-data").post(verifyJWT, getSellerDashBoardData);
 router.route("/get-seller-data").post(verifyJWT, getSellerData);
+router.route("/send-otp").post(sendOTP);
 
 router
   .route("/avatar")

@@ -6,6 +6,7 @@ import { Hotel } from "../models/hotel.model.js";
 import mongoose from "mongoose";
 import { Order } from "../models/order.model.js";
 import { io } from "../app.js";
+import { deleteFileFromCloudinary } from '../utils/cloudinary.js';
 
 const createHotel = asyncHandler(async (req, res) => {
   const {
@@ -76,8 +77,8 @@ const createHotel = asyncHandler(async (req, res) => {
 });
 
 const editHotel = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const hotel = await Hotel.findById(id);
+  const {_id} = req.body.hotel;
+  const hotel = await Hotel.findById(_id);
   if (!hotel) {
     throw new ApiError(404, "Hotel not found");
   }
@@ -93,8 +94,18 @@ const editHotel = asyncHandler(async (req, res) => {
     state,
     images,
     pinCode,
-  } = req.body;
-
+    pdf,
+    newPdf,
+    old,
+    deletedImages
+  } = req.body.hotel;
+  // Delete old pdf from cloudinary
+  if(newPdf) 
+    deleteFileFromCloudinary(old);
+  // Delete images from cloudinary
+  deletedImages.forEach(async (img) => {
+    deleteFileFromCloudinary(img);
+  });
   if (
     !title ||
     !description ||
@@ -105,13 +116,14 @@ const editHotel = asyncHandler(async (req, res) => {
     !city ||
     !state ||
     !images ||
-    !pinCode
+    !pinCode ||
+    !pdf
   ) {
     throw new ApiError(400, "All fields are required");
   }
 
-  await Hotel.findByIdAndUpdate(
-    id,
+  const newHotel = await Hotel.findByIdAndUpdate(
+    _id,
     {
       $set: {
         title,
@@ -125,10 +137,12 @@ const editHotel = asyncHandler(async (req, res) => {
         images,
         pinCode,
         approvalStatus: "pending",
+        pdf
       },
     },
     { new: true }
   );
+  io.emit("hotel_is_edited", newHotel)
 
   return res
     .status(200)
@@ -301,6 +315,8 @@ const searchHotel = asyncHandler(async (req, res) => {
     additionalQueries.push({ facilities: { $regex: /gym/i } });
   }
 
+  additionalQueries.push({approvalStatus: "approved"})
+
   
     const priceQuery = {};
     if (min_price) priceQuery.$gte = min_price;
@@ -325,7 +341,6 @@ const searchHotel = asyncHandler(async (req, res) => {
   }
   else{
     hotels = await Hotel.find(finalQuery?finalQuery:null);
-    console.log(hotels);
   }
   
 
