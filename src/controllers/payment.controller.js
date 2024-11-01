@@ -6,7 +6,7 @@ import { Hotel } from './../models/hotel.model.js';
 import crypto from "crypto";
 import { Order } from "../models/order.model.js";
 import { User } from "../models/user.model.js";
-import mongoose from "mongoose";
+import { TempOrder } from "../models/tempOrder.model.js";
 import { io } from "../app.js";
 
 const instance = new Razorpay({
@@ -16,6 +16,7 @@ const instance = new Razorpay({
 
 const checkout = asyncHandler(async (req,res) => {
     const { rooms, days, hotelId } = req.body;
+    const uniqueId = req.params.id;
     const hotel = await Hotel.findById(hotelId);
     if (!hotel) {
         throw new ApiError(404, "Hotel not found");
@@ -29,12 +30,12 @@ const checkout = asyncHandler(async (req,res) => {
         amount: total*100,
         currency: "INR",
     }
-    req.session.orderDetails = {
-        ...req.session.orderDetails,
+    const tempOrder = await TempOrder.create({
+        uniqueId,
         rooms,
         amount: total,
         hotelId,
-    };
+    })
 
     const order = await instance.orders.create(options);
 
@@ -47,25 +48,27 @@ const paymentverification = asyncHandler(async (req,res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
-    
+    const uniqueId = req.params.id;
+    const data = await TempOrder.findOneAndDelete({ uniqueId });
+    console.log("data", data);
     const isAuthentic = expectedSignature === razorpay_signature;
     if(isAuthentic) {
-        const hotel = await Hotel.findById(req.session.orderDetails.hotelId);
+        const hotel = await Hotel.findById(data.hotelId);
         const order = await Order.create({
             hotel,
-            checkin: req.session.orderDetails.checkInDate,
-            checkout: req.session.orderDetails.checkOutDate,
-            rooms: req.session.orderDetails.rooms,
-            amount: req.session.orderDetails.amount,
-            customer: req.session.orderDetails.userId,
-            guests: req.session.orderDetails.guestNames ,
+            checkin: data.checkin,
+            checkout: data.checkout,
+            rooms: data.rooms,
+            amount: data.amount,
+            customer: data.userId,
+            guests: data.guests ,
             paymentDetails: {razorpay_order_id, razorpay_payment_id, razorpay_signature}
         });
-        const user = await User.findById(req.session.orderDetails.userId);
+        const user = await User.findById(data.userId);
         user.previousBookings.push(order._id);
         user.save();
         
-        const { owner } = await Hotel.findById(req.session.orderDetails.hotelId);
+        const { owner } = await Hotel.findById(data.hotelId);
         
         const ownerUser = await User.findById(owner);
         
@@ -83,7 +86,16 @@ const paymentverification = asyncHandler(async (req,res) => {
 
 const getkey = asyncHandler(async (req,res) => {
     const { userId, guestNames,checkInDate,checkOutDate } = req.body;
-    req.session.orderDetails = {...req.session.orderDetails, userId, guestNames, checkInDate, checkOutDate};
+    const uniqueId = req.params.id;
+    const tempOrder = await TempOrder.findOne({ uniqueId });
+
+    tempOrder.userId = userId;
+    tempOrder.guests = guestNames;
+    tempOrder.checkin = checkInDate;
+    tempOrder.checkout = checkOutDate;
+
+    await tempOrder.save();
+
     return res.status(200).json(new ApiResponse(200, { key: process.env.RAZORPAY_KEY_ID }, "Razorpay key fetched successfully"));
 });
 

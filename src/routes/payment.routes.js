@@ -4,8 +4,8 @@ import { checkout, getkey, paymentverification } from '../controllers/payment.co
 
 const router = Router();
 
-router.route("/checkout").post(verifyJWT, checkout);
-router.route("/paymentverification").post(verifyJWT, paymentverification);
-router.route("/getkey").post(verifyJWT, getkey);
+router.route("/checkout/:id").post(verifyJWT, checkout);
+router.route("/paymentverification/:id").post(verifyJWT, paymentverification);
+router.route("/getkey/:id").post(verifyJWT, getkey);
 
 export default router;
