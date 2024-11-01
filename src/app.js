@@ -11,12 +11,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "https://stayheaven.vercel.app/",
-      "https://stayheaven.vercel.app",
       process.env.CORS_ORIGIN,
+      "http://localhost:5173",
       "https://api.razorpay.com"
     ],
-    methods: ["GET", "POST"],
     credentials: true,
   },
 });
@@ -24,12 +22,10 @@ const io = new Server(server, {
 app.use(
   cors({
     origin:  [
-      "https://stayheaven.vercel.app/",
-      "https://stayheaven.vercel.app",
       process.env.CORS_ORIGIN,
+      "http://localhost:5173",
       "https://api.razorpay.com"
     ],
-    methods: ["GET", "POST"],
     credentials: true,
   })
 );
