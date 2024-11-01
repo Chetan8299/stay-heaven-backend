@@ -13,7 +13,7 @@ import { deleteFileFromCloudinary } from "../utils/cloudinary.js";
 const generateAccessAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId);
-
+        
         const accessToken = user.generateAccessToken();
         user.accessToken = accessToken;
         await user.save({ validateBeforeSave: false });

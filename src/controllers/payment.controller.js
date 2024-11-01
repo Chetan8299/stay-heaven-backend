@@ -50,7 +50,6 @@ const paymentverification = asyncHandler(async (req,res) => {
     const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest('hex');
     const uniqueId = req.params.id;
     const data = await TempOrder.findOneAndDelete({ uniqueId });
-    console.log("data", data);
     const isAuthentic = expectedSignature === razorpay_signature;
     if(isAuthentic) {
         const hotel = await Hotel.findById(data.hotelId);
