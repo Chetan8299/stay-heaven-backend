@@ -14,13 +14,9 @@ const instance = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
 
-let orderDetails;
 const checkout = asyncHandler(async (req,res) => {
-    console.log("1")
     const { rooms, days, hotelId } = req.body;
-    console.log("2", hotelId)
     const hotel = await Hotel.findById(hotelId);
-    console.log("3")    
     if (!hotel) {
         throw new ApiError(404, "Hotel not found");
     }
@@ -33,7 +29,12 @@ const checkout = asyncHandler(async (req,res) => {
         amount: total*100,
         currency: "INR",
     }
-    orderDetails = {...orderDetails, rooms, amount: total, hotelId};
+    req.session.orderDetails = {
+        ...req.session.orderDetails,
+        rooms,
+        amount: total,
+        hotelId,
+    };
 
     const order = await instance.orders.create(options);
 
@@ -49,23 +50,22 @@ const paymentverification = asyncHandler(async (req,res) => {
     
     const isAuthentic = expectedSignature === razorpay_signature;
     if(isAuthentic) {
-        console.log("authentic", orderDetails)
-        const hotel = await Hotel.findById(orderDetails.hotelId);
+        const hotel = await Hotel.findById(req.session.orderDetails.hotelId);
         const order = await Order.create({
             hotel,
-            checkin: orderDetails.checkInDate,
-            checkout: orderDetails.checkOutDate,
-            rooms: orderDetails.rooms,
-            amount: orderDetails.amount,
-            customer: orderDetails.userId,
-            guests: orderDetails.guestNames ,
+            checkin: req.session.orderDetails.checkInDate,
+            checkout: req.session.orderDetails.checkOutDate,
+            rooms: req.session.orderDetails.rooms,
+            amount: req.session.orderDetails.amount,
+            customer: req.session.orderDetails.userId,
+            guests: req.session.orderDetails.guestNames ,
             paymentDetails: {razorpay_order_id, razorpay_payment_id, razorpay_signature}
         });
-        const user = await User.findById(orderDetails.userId);
+        const user = await User.findById(req.session.orderDetails.userId);
         user.previousBookings.push(order._id);
         user.save();
         
-        const { owner } = await Hotel.findById(orderDetails.hotelId);
+        const { owner } = await Hotel.findById(req.session.orderDetails.hotelId);
         
         const ownerUser = await User.findById(owner);
         
@@ -83,7 +83,7 @@ const paymentverification = asyncHandler(async (req,res) => {
 
 const getkey = asyncHandler(async (req,res) => {
     const { userId, guestNames,checkInDate,checkOutDate } = req.body;
-    orderDetails = {...orderDetails, userId, guestNames, checkInDate, checkOutDate};
+    req.session.orderDetails = {...req.session.orderDetails, userId, guestNames, checkInDate, checkOutDate};
     return res.status(200).json(new ApiResponse(200, { key: process.env.RAZORPAY_KEY_ID }, "Razorpay key fetched successfully"));
 });
 
