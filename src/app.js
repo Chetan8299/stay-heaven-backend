@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import http from "http";
+import http, { get } from "http";
 import { Server } from "socket.io";
 import session from "express-session";
 
@@ -11,9 +11,12 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
+      "https://stayheaven.vercel.app/",
+      "https://stayheaven.vercel.app",
       process.env.CORS_ORIGIN,
       "https://api.razorpay.com"
     ],
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
@@ -21,9 +24,12 @@ const io = new Server(server, {
 app.use(
   cors({
     origin:  [
+      "https://stayheaven.vercel.app/",
+      "https://stayheaven.vercel.app",
       process.env.CORS_ORIGIN,
       "https://api.razorpay.com"
     ],
+    methods: ["GET", "POST"],
     credentials: true,
   })
 );
