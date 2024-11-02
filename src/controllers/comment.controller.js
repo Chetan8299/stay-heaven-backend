@@ -60,7 +60,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     }
 
     
-    hotel.comments = hotel.comments.filter(comment => comment.toString() !== commentId.toString());
+    hotel.comments = hotel.comments.filter(comment => comment._id !== commentId.toString());
     const totalRating = hotel.comments.reduce((acc, cur) => acc + cur.rating, 0);
     hotel.rating = totalRating / hotel.comments.length;
     hotel.save();
