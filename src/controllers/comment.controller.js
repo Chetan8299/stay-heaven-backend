@@ -50,7 +50,6 @@ const createComment = asyncHandler(async (req, res) => {
 
 const deleteComment = asyncHandler(async (req, res) => {
     const commentId = req.params.id;
-    const comment = await Comment.findByIdAndDelete(commentId);
     const hotelId = req.body.hotelId;
     const hotel = await Hotel.findById(hotelId).populate({ path: "comments",
         model: "Comment"});
@@ -58,12 +57,17 @@ const deleteComment = asyncHandler(async (req, res) => {
     if (!hotel) {
         throw new ApiError(404, "Hotel not found");
     }
-
+    hotel.comments = hotel.comments.filter(comment => comment._id != commentId.toString());
+    if(hotel.comments.length == 0){
+        hotel.rating = 0;
+        hotel.save();
+    } else {
+     const totalRating = hotel.comments.reduce((acc, cur) => acc + cur.rating, 0);
+     hotel.rating = totalRating / hotel.comments.length;
+     hotel.save();
+    }
     
-    hotel.comments = hotel.comments.filter(comment => comment._id !== commentId.toString());
-    const totalRating = hotel.comments.reduce((acc, cur) => acc + cur.rating, 0);
-    hotel.rating = totalRating / hotel.comments.length;
-    hotel.save();
+    const comment = await Comment.findByIdAndDelete(commentId);
 
     return res.status(200).json(new ApiResponse(200, comment, "Comment deleted successfully"));
 })
