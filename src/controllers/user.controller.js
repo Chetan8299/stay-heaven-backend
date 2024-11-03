@@ -312,7 +312,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         from: "stayheaven123@gmail.com",
         to: user?.email,
         subject: "Reset Password",
-        text: `Your password reset link is: http://localhost:5173/resetPassword/${user?._id}/${token}`,
+        text: `Your password reset link is: ${process.env.FRONTEND_URL}/resetPassword/${user?._id}/${token}`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
