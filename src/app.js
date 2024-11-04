@@ -11,7 +11,6 @@ const io = new Server(server, {
   cors: {
     origin: [
       process.env.CORS_ORIGIN,
-      "http://localhost:5173",
       "https://api.razorpay.com"
     ],
     credentials: true,
@@ -22,7 +21,6 @@ app.use(
   cors({
     origin:  [
       process.env.CORS_ORIGIN,
-      "http://localhost:5173",
       "https://api.razorpay.com"
     ],
     credentials: true,
