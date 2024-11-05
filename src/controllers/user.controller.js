@@ -224,12 +224,47 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullName, email, username, phoneNumber, avatar } = req.body;
+    const oldUser = await User.findById(req.user?._id);
+    const oldFullName = oldUser.fullName;
+    const oldEmail = oldUser.email;
+    const oldUsername = oldUser.username;
+    const oldPhoneNumber = oldUser.phoneNumber;
+    const oldAvatar = oldUser.avatar;
+    
     if (!fullName || !email || !username || !phoneNumber || !avatar) {
         throw new ApiError(400, "All fields are required");
     }
 
-    const userurl = await User.findById(req.user?._id);
-    await deleteFileFromCloudinary(userurl.avatar);
+    if (phoneNumber.length !== 10) {
+        throw new ApiError(400, "Phone number must be 10 digits");
+    }
+
+    if(fullName === oldFullName && email === oldEmail && username === oldUsername && phoneNumber === oldPhoneNumber && avatar === oldAvatar) {
+        console.log("same");
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200, {}, "Account details updated successfully")
+        );
+    }
+
+    const existedUserByUsername = await User.findOne({ username });
+    if (existedUserByUsername && username !== oldUsername) {
+        throw new ApiError(409, "User with this username already exists");
+    }
+
+    const existedUserByEmail = await User.findOne({ email });
+    if (existedUserByEmail && email !== oldEmail) {
+        throw new ApiError(409, "User with this email already exists");
+    }
+
+    const existedUserByPhoneNumber = await User.findOne({ phoneNumber });
+    if (existedUserByPhoneNumber && phoneNumber !== oldPhoneNumber) {
+        throw new ApiError(409, "User with this phone number already exists");
+    }
+    if(avatar !== oldAvatar) {
+        await deleteFileFromCloudinary(oldAvatar);
+    }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
@@ -274,16 +309,35 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
-    const { username } = req.body;
+    const { identity } = req.body;
 
-    if (!username) {
-        throw new ApiError(400, "Username is required");
+    if (!identity) {
+        throw new ApiError(404, "All fields are required");
     }
 
-    const user = await User.findOne({ username });
+    const email = identity;
+    const username = identity;
+    let emailUsername;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    function isValidEmail(email) {
+        return emailRegex.test(email);
+    }
+
+    if (isValidEmail(email)) {
+        emailUsername = { email: email };
+    } else {
+        emailUsername = { username: username };
+    }
+
+    if (!emailUsername) {
+        throw new ApiError(400, "Username or Email is required"); // wapas ana email ke liye
+    }
+
+    const user = await User.findOne(emailUsername);
 
     if (!user) {
-        throw new ApiError(404, "User not found - Username not found");
+        throw new ApiError(404, "User not found - Username / Email not found");
     }
 
     const token = jwt.sign(
