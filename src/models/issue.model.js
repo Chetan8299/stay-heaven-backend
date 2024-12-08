@@ -12,6 +12,15 @@ const issueSchema = new mongoose.Schema({
   images:{
     type: Array,
   },
+  user:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  status:{
+    type: String,
+    enum: ["pending", "resolved"],
+    default: "pending",
+  }
 },{timestamps: true});
 
 export const Issue = mongoose.model("Issue", issueSchema);

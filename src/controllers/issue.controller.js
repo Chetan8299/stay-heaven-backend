@@ -20,7 +20,8 @@ const createIssue = asyncHandler(async (req, res) => {
     const issue = await Issue.create({
         category,
         description,
-        images
+        images,
+        user: id,
     });
 
     await issue.save();

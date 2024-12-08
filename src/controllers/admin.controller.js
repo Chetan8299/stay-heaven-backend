@@ -7,6 +7,7 @@ import { Order } from "./../models/order.model.js";
 import { myCreatedPlaces } from "./hotel.controller.js";
 import { io } from "../app.js";
 import { deleteFileFromCloudinary } from '../utils/cloudinary.js';
+import { Issue } from "../models/issue.model.js";
 
 const getAllHotels = asyncHandler(async (req, res) => {
   const hotels = await Hotel.find().populate("owner");
@@ -222,8 +223,25 @@ const getAdminDashboardData = asyncHandler(async (req, res) => {
     );
 });
 
+const getIssues = asyncHandler(async (req, res) => {
+  const issues = await Issue.find().populate("user");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, issues, "Issues fetched successfully"));
+});
 
-
+const updateIssue = asyncHandler(async (req, res) => {
+  const {id, status} = req.body;
+  const issue = await Issue.findById(id);
+  if (!issue) {
+    throw new ApiError(404, "Issue not found");
+  }
+  issue.status = status;
+  await issue.save();
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Issue updated successfully"));
+});
 
 export {
   getAllHotels,
@@ -239,5 +257,7 @@ export {
   allOrders,
   getAllPendingHotels,
   getAdminDashboardData,
-  rejectSeller
+  rejectSeller,
+  getIssues,
+  updateIssue,
 };

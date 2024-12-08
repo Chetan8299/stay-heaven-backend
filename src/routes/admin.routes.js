@@ -14,8 +14,10 @@ import {
   unbanUser,
   getAllPendingHotels,
   getAdminDashboardData,
-  rejectSeller
+  rejectSeller,
+  updateIssue
 } from "../controllers/admin.controller.js";
+import { getIssues } from "../controllers/issue.controller.js";
 
 const router = Router();
 
@@ -33,5 +35,7 @@ router.route("/ban-user").post(verifyJWT, verifyAdmin, banUser);
 router.route("/unban-user").post(verifyJWT, verifyAdmin, unbanUser);
 router.route("/admin-dashboard").post(verifyJWT, verifyAdmin, getAdminDashboardData);
 router.route("/reject-seller").post(verifyJWT, verifyAdmin, rejectSeller);
+router.route("/issue").post(verifyJWT, verifyAdmin, getIssues);
+router.route("/issue-update").post(verifyJWT, verifyAdmin, updateIssue);
 
 export default router;
