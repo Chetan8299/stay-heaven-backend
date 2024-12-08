@@ -44,6 +44,7 @@ import hotelRoutes from "./routes/hotel.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import issueRoutes from "./routes/issue.routes.js";
 import chatbotRoutes from "./routes/chatbot.routes.js"
 
 app.use("/user", userRoutes);
@@ -51,6 +52,7 @@ app.use("/hotel", hotelRoutes);
 app.use("/comment", commentRoutes);
 app.use("/admin", adminRoutes);
 app.use("/payment", paymentRoutes);
+app.use("/issue", issueRoutes);
 app.use("/chatbot", chatbotRoutes);
 
 export { app,server,io };
