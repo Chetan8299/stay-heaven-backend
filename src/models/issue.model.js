@@ -12,10 +12,6 @@ const issueSchema = new mongoose.Schema({
   images:{
     type: Array,
   },
-  user:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  }
 },{timestamps: true});
 
 export const Issue = mongoose.model("Issue", issueSchema);

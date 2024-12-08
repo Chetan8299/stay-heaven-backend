@@ -18,10 +18,17 @@ const createIssue = asyncHandler(async (req, res) => {
     }
 
     const issue = await Issue.create({
-        user: id,
         category,
         description,
         images
+    });
+
+    await issue.save();
+
+    await User.findByIdAndUpdate(id, {
+        $push: {
+            issues: issue._id,
+        },
     });
 
     return res
@@ -36,7 +43,7 @@ const getIssues = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Unauthorized request");
     }
 
-    const issues = await Issue.find({ user: id });
+    const issues = req.user.issues;
 
     return res
         .status(200)
