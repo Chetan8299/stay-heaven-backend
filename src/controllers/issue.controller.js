@@ -2,7 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Issue } from "../models/issue.model.js";
-
+import { User } from "../models/user.model.js";
+import { io } from "../app.js";
 
 const createIssue = asyncHandler(async (req, res) => {
     const id = req.user?._id;
@@ -25,13 +26,14 @@ const createIssue = asyncHandler(async (req, res) => {
     });
 
     await issue.save();
-
+    console.log(issue)
     await User.findByIdAndUpdate(id, {
         $push: {
             issues: issue._id,
         },
     });
 
+    io.emit("issue_is_created", { issue });
     return res
         .status(200)
         .json(new ApiResponse(200, issue, "Issue created successfully"));
@@ -44,11 +46,11 @@ const getIssues = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Unauthorized request");
     }
 
-    const issues = req.user.issues;
+    const issues = await Issue.find({ user: id }).populate("user");
 
     return res
         .status(200)
-        .json(new ApiResponse(200, issues, "Issues fetched successfully"));
+        .json(new ApiResponse(200, {issues}, "Issues fetched successfully"));
 })
 
 export {createIssue, getIssues}
