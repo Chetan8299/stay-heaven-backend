@@ -268,6 +268,7 @@ const model = genAI.getGenerativeModel({
     Ensure all validations and requirements are clearly explained to the user for a seamless experience.
     If asked to do anything else other than the above-mentioned tasks, respond with appropriate message that I can't help you with this.
     give me the response in normal text format no need to use mdx format.
+    Always respond with a message that is easy to understand and user-friendly and do not include any technical details in the response.
   `,
 
     tools: [
