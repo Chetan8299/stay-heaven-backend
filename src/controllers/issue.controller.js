@@ -26,7 +26,6 @@ const createIssue = asyncHandler(async (req, res) => {
     });
 
     await issue.save();
-    console.log(issue)
     await User.findByIdAndUpdate(id, {
         $push: {
             issues: issue._id,

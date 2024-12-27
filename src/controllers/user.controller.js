@@ -240,7 +240,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     }
 
     if(fullName === oldFullName && email === oldEmail && username === oldUsername && phoneNumber === oldPhoneNumber && avatar === oldAvatar) {
-        console.log("same");
         return res
         .status(200)
         .json(
