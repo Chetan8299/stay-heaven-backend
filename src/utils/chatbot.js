@@ -260,11 +260,11 @@ const model = genAI.getGenerativeModel({
     max_price: number
     rating: number
     rating_order: string
-    if user asks the hotel with the rating above a particular rating then provide "greater" in rating_order.
-    if user asks the hotel with the rating exactly equal to a particular rating then provide "equal" in rating_order.
-    if user asks the hotel with the rating below a particular rating then provide "less" in rating_order.
-    if user asks the hotel with the rating less than or equal to a particular rating then provide "lessequal" in rating_order.
-    if user asks the hotel with the rating greater than or equal to a particular rating then provide "greaterequal" in rating_order.
+    if user asks the hotels with the rating above a particular rating then provide "greater" in rating_order.
+    if user asks the hotels with the rating exactly equal to a particular rating then provide "equal" in rating_order.
+    if user asks the hotels with the rating below a particular rating then provide "less" in rating_order.
+    if user asks the hotels with the rating less than or equal to a particular rating then provide "lessequal" in rating_order.
+    if user asks the hotels with the rating greater than or equal to a particular rating then provide "greaterequal" in rating_order.
     If user dont give min price and max price, then keep min price as 0 and max price as 50000.
     if user dont mention any of the parameters, then keep them as false.
     dont return more than 5 hotels at a time.
