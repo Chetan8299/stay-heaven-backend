@@ -89,10 +89,10 @@ async function file_issue(category, description) {
         description,
     });
     await User.findByIdAndUpdate(userId, {
-      $push: {
-          issues: issue._id,
-      },
-  });
+        $push: {
+            issues: issue._id,
+        },
+    });
     return "Issue file successfully";
 }
 
@@ -105,80 +105,86 @@ async function get_issues() {
     return res;
 }
 
-async function search_hotel (wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price=0, max_price=50000, rating, rating_order) {
-  let baseQuery = null;
-  if(searchterm){
-    baseQuery = {
-      $or: [
-        { title: { $regex: new RegExp(searchterm, "i") } },
-        { city: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
-        { state: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
-      ],
-    };
-  }
+async function search_hotel(
+    wifi,
+    ac,
+    breakfast,
+    parking,
+    kitchen,
+    gym,
+    searchterm,
+    min_price = 0,
+    max_price = 50000,
+    rating,
+    rating_order
+) {
+    console.log(wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price, rating, rating_order);
+    let baseQuery = null;
+    if (searchterm) {
+        baseQuery = {
+            $or: [
+                { title: { $regex: new RegExp(searchterm, "i") } },
+                { city: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+                { state: { $regex: new RegExp(`\\b${searchterm}\\b`, "i") } },
+            ],
+        };
+    }
 
-  const additionalQueries = [];
+    const additionalQueries = [];
 
-  if (wifi) {
-    additionalQueries.push({ facilities: { $regex: /wifi/i } });
-  }
-  if (ac) {
-    additionalQueries.push({ facilities: { $regex: /ac/i } });
-  }
-  if (breakfast) {
-    additionalQueries.push({ facilities: { $regex: /breakfast/i } });
-  }
-  if (parking) {
-    additionalQueries.push({ facilities: { $regex: /parking/i } });
-  }
-  if (kitchen) {
-    additionalQueries.push({ facilities: { $regex: /kitchen/i } });
-  }
-  if (gym) {
-    additionalQueries.push({ facilities: { $regex: /gym/i } });
-  }
-  if(rating_order && rating){
-    if(rating_order === "greater"){
-      additionalQueries.push({rating: {$gt: rating}});
+    if (wifi) {
+        additionalQueries.push({ facilities: { $regex: /wifi/i } });
     }
-    else if(rating_order === "equal"){
-      additionalQueries.push({rating: {$eq: rating}});
+    if (ac) {
+        additionalQueries.push({ facilities: { $regex: /ac/i } });
     }
-    else if(rating_order === "less"){
-      additionalQueries.push({rating: {$lt: rating}});
+    if (breakfast) {
+        additionalQueries.push({ facilities: { $regex: /breakfast/i } });
     }
-    else if(rating_order === "lessequal"){
-      additionalQueries.push({rating: {$lte: rating}});
+    if (parking) {
+        additionalQueries.push({ facilities: { $regex: /parking/i } });
     }
-    else if(rating_order === "greaterequal"){
-      additionalQueries.push({rating: {$gte: rating}});
+    if (kitchen) {
+        additionalQueries.push({ facilities: { $regex: /kitchen/i } });
     }
-  }
-  
-  additionalQueries.push({approvalStatus: "approved"})
+    if (gym) {
+        additionalQueries.push({ facilities: { $regex: /gym/i } });
+    }
+    if (rating_order && rating) {
+        if (rating_order === "greater") {
+            additionalQueries.push({ rating: { $gt: rating } });
+        } else if (rating_order === "equal") {
+            additionalQueries.push({ rating: { $eq: rating } });
+        } else if (rating_order === "less") {
+            additionalQueries.push({ rating: { $lt: rating } });
+        } else if (rating_order === "lessequal") {
+            additionalQueries.push({ rating: { $lte: rating } });
+        } else if (rating_order === "greaterequal") {
+            additionalQueries.push({ rating: { $gte: rating } });
+        }
+    }
 
-  
+    additionalQueries.push({ approvalStatus: "approved" });
+
     const priceQuery = {};
     if (min_price) priceQuery.$gte = min_price;
     if (max_price) priceQuery.$lte = max_price;
     additionalQueries.push({ price: priceQuery });
-  
 
-  let finalQuery;
-  if(additionalQueries.length > 0 && baseQuery){
-    finalQuery = { $and: [baseQuery, ...additionalQueries] };
-  }
-  else if(additionalQueries.length > 0){
-    finalQuery = { $and: [...additionalQueries] };
-  }
-  else if(baseQuery){
-    finalQuery = baseQuery;
-  }
+    let finalQuery;
+    if (additionalQueries.length > 0 && baseQuery) {
+        finalQuery = { $and: [baseQuery, ...additionalQueries] };
+    } else if (additionalQueries.length > 0) {
+        finalQuery = { $and: [...additionalQueries] };
+    } else if (baseQuery) {
+        finalQuery = baseQuery;
+    }
 
-  let hotels;
-    hotels = await Hotel.find(finalQuery?finalQuery:null);
-  const res = hotels.toString();
-  return res;
+    let hotels;
+    hotels = await Hotel.find(finalQuery ? finalQuery : null);
+    hotels.map((hotel) => console.log(hotel.title));
+    const res = hotels.toString();
+    return res;
 }
 const model = genAI.getGenerativeModel({
     model: "gemini-1.5-flash",
@@ -240,7 +246,7 @@ const model = genAI.getGenerativeModel({
   
     if the user wants to see all the issues, call the get_issues function and display all the issue details.
 
-  5. Search Hotels
+  5. Search/Find Hotels
 
     If the user wants to search for a hotel, call the search_hotel function with the following parameters:
     wifi: boolean
@@ -249,7 +255,7 @@ const model = genAI.getGenerativeModel({
     parking: boolean
     kitchen: boolean
     gym: boolean
-    searchterm: string
+    searchterm: string - can be city, state, title.
     min_price: number
     max_price: number
     rating: number
@@ -269,6 +275,7 @@ const model = genAI.getGenerativeModel({
     If asked to do anything else other than the above-mentioned tasks, respond with appropriate message that I can't help you with this.
     give me the response in normal text format no need to use mdx format.
     Always respond with a message that is easy to understand and user-friendly and do not include any technical details in the response.
+    Don't tell the user about the internal details like api, database, json, etc. Simply tell them the information you are having access of.
   `,
 
     tools: [
@@ -383,7 +390,7 @@ const model = genAI.getGenerativeModel({
                                 type: "number",
                             },
                             rating: {
-                            type: "number",
+                                type: "number",
                             },
                             rating_order: {
                                 type: "string",
@@ -458,11 +465,35 @@ async function run(userInput) {
                     } else if (functionName === "file_issue") {
                         const { category, description } = args;
                         response = await file_issue(category, description);
-                    }else if (functionName === "get_issues") {
+                    } else if (functionName === "get_issues") {
                         response = await get_issues();
-                    } else if(functionName === "search_hotel") {
-                        const { wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price, rating, rating_order } = args;
-                        response = await search_hotel(wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price, rating, rating_order);
+                    } else if (functionName === "search_hotel") {
+                        const {
+                            wifi,
+                            ac,
+                            breakfast,
+                            parking,
+                            kitchen,
+                            gym,
+                            searchterm,
+                            min_price,
+                            max_price,
+                            rating,
+                            rating_order,
+                        } = args;
+                        response = await search_hotel(
+                            wifi,
+                            ac,
+                            breakfast,
+                            parking,
+                            kitchen,
+                            gym,
+                            searchterm,
+                            min_price,
+                            max_price,
+                            rating,
+                            rating_order
+                        );
                     } else {
                         response = "Unknown function call.";
                     }
