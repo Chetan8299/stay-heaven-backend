@@ -258,6 +258,7 @@ const model = genAI.getGenerativeModel({
     max_price: number
     rating: number
     rating_order: string
+    if user gives min price and max price as 10k, or something else then always convert it into number.
     if user asks the hotel with the rating above a particular rating then provide "greater" in rating_order.
     if user asks the hotel with the rating exactly equal to a particular rating then provide "equal" in rating_order.
     if user asks the hotel with the rating below a particular rating then provide "less" in rating_order.
