@@ -118,7 +118,6 @@ async function search_hotel(
     rating,
     rating_order
 ) {
-    console.log(wifi, ac, breakfast, parking, kitchen, gym, searchterm, min_price, max_price, rating, rating_order);
     let baseQuery = null;
     if (searchterm) {
         baseQuery = {
@@ -182,7 +181,6 @@ async function search_hotel(
 
     let hotels;
     hotels = await Hotel.find(finalQuery ? finalQuery : null);
-    hotels.map((hotel) => console.log(hotel.title));
     const res = hotels.toString();
     return res;
 }
