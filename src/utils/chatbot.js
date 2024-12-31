@@ -201,19 +201,19 @@ const model = genAI.getGenerativeModel({
 
     Give an array of hotels with name , city, hotel id and max guests allowed in a single room.
     If hotels array is empty or undefined then return "No hotels found" then respond with this message only. 
-    if multiple hotels are there in array then ask the user which hotel they want to book bye sending the list of hotels (don't show id to user).
+    if multiple hotels are there in array then ask the user which hotel they want to book by sending the list of hotels (don't show id to user).
 
+    Always call the getdate function to get current date in dd/mm/yyyy format.
+    
     Gather Booking Details:
     Check-In and Check-Out Dates:
     Ask the user to provide check-in and check-out dates.
-    Call "getdate" function to get current date in dd/mm/yyyy format.
 
 
     Validate the dates by:
     Ensuring the check-in date is equal or after the current date.
     Ensuring the check-out date is after the check-in date.
     Don't take dates before the current date.
-    Call "getdate" function to get current date in dd/mm/yyyy format.
     If the dates are invalid, prompt the user to enter valid dates with specific guidance:
     If the check-in date is in the past, request a future date.
     If the check-in date is later than the check-out date, ask for a correct check-in date.
