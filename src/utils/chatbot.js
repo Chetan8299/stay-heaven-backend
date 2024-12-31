@@ -50,7 +50,7 @@ async function book_hotel(
     rooms
 ) {
     console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
-    if(typeof guestdetails === "object") {
+    if(!(guestdetails instanceof Array)) {
         console.log("entering");
         guestdetails = [guestdetails];
     }
