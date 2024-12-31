@@ -50,6 +50,9 @@ async function book_hotel(
     rooms
 ) {
     console.log(checkindate, checkoutdate, guestnumber, guestdetails, rooms, id, name);
+    if(typeof guestdetails === "object") {
+        guestdetails = [guestdetails];
+    }
     io.emit("call_from_chatbot", {
         id,
         name,
@@ -59,7 +62,7 @@ async function book_hotel(
         guestdetails,
         rooms,
     });
-    return "Please retry if payment gateway is not working";
+    return "Payment gateway is opening, Please retry if payment gateway doesn't open";
 }
 
 async function previous_booking() {
