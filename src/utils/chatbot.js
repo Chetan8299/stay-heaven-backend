@@ -49,7 +49,7 @@ async function book_hotel(
     guestdetails,
     rooms
 ) {
-    console.log(checkindate, checkoutdate);
+    console.log(checkindate, checkoutdate, guestnumber, guestdetails, rooms, id, name);
     io.emit("call_from_chatbot", {
         id,
         name,
