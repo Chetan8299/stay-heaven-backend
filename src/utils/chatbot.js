@@ -52,6 +52,7 @@ async function book_hotel(
     if(typeof guestdetails === "object") {
         guestdetails = [guestdetails];
     }
+    console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
     io.emit("call_from_chatbot", {
         id,
         name,
