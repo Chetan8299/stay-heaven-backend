@@ -49,7 +49,9 @@ async function book_hotel(
     guestdetails,
     rooms
 ) {
+    console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
     if(typeof guestdetails === "object") {
+        console.log("entering");
         guestdetails = [guestdetails];
     }
     console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
