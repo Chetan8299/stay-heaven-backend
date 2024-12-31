@@ -37,7 +37,8 @@ async function getdate() {
     const dd = String(today.getDate()).padStart(2, "0");
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const yyyy = today.getFullYear();
-    return `todays's date : ${dd}/${mm}/${yyyy}`;
+    console.log(`current date : ${dd}/${mm}/${yyyy}`);
+    return `current date : ${dd}/${mm}/${yyyy}`;
 }
 
 async function book_hotel(
@@ -209,8 +210,9 @@ const model = genAI.getGenerativeModel({
 
 
     Validate the dates by:
-    Ensuring the check-in date is equal or later than the current date.
-    Ensuring the check-out date is later than the check-in date.
+    Ensuring the check-in date is equal or after the current date.
+    Ensuring the check-out date is after the check-in date.
+    Don't take dates before the current date.
     If the dates are invalid, prompt the user to enter valid dates with specific guidance:
     If the check-in date is in the past, request a future date.
     If the check-in date is later than the check-out date, ask for a correct check-in date.
