@@ -37,7 +37,7 @@ async function getdate() {
     const dd = String(today.getDate()).padStart(2, "0");
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const yyyy = today.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
+    return `todays's date : ${dd}/${mm}/${yyyy}`;
 }
 
 async function book_hotel(
@@ -49,6 +49,7 @@ async function book_hotel(
     guestdetails,
     rooms
 ) {
+    console.log(checkindate, checkoutdate);
     io.emit("call_from_chatbot", {
         id,
         name,
@@ -199,14 +200,16 @@ const model = genAI.getGenerativeModel({
     Gather Booking Details:
     Check-In and Check-Out Dates:
     Ask the user to provide check-in and check-out dates.
-    Call "getdate" function to get current date in dd/mm//yyyy format.
+    Call "getdate" function to get current date in dd/mm/yyyy format.
+
 
     Validate the dates by:
-    Ensuring the check-in date is later than the current date.
+    Ensuring the check-in date is equal or later than the current date.
     Ensuring the check-out date is later than the check-in date.
     If the dates are invalid, prompt the user to enter valid dates with specific guidance:
     If the check-in date is in the past, request a future date.
     If the check-in date is later than the check-out date, ask for a correct check-in date.
+    If the user gives date like today or tomorrow or something in words then you only convert it into dd/mm/yyyy format.
 
     Guest Information:
     Ask the user for the number of guests, along with their full names and phone numbers.
@@ -221,7 +224,7 @@ const model = genAI.getGenerativeModel({
     If the room count is insufficient, prompt the user to enter a valid number of rooms.
 
     Confirm and Book:
-    Confirm details from user. If user says yes then only Call the book_hotel function with all the parameters.
+    Confirm details from user. If user says yes then only Call the book_hotel function with all the parameters (checkin and checkout date should be in dd/mm/yyyy format).
     The function will return the booking status:
     If successful, share the booking confirmation message with the user.
     If unsuccessful, inform the user about the issue.
