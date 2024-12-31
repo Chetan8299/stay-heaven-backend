@@ -213,6 +213,7 @@ const model = genAI.getGenerativeModel({
     Ensuring the check-in date is equal or after the current date.
     Ensuring the check-out date is after the check-in date.
     Don't take dates before the current date.
+    Call "getdate" function to get current date in dd/mm/yyyy format.
     If the dates are invalid, prompt the user to enter valid dates with specific guidance:
     If the check-in date is in the past, request a future date.
     If the check-in date is later than the check-out date, ask for a correct check-in date.
