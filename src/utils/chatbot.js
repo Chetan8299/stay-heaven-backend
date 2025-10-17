@@ -50,12 +50,28 @@ async function book_hotel(
     guestdetails,
     rooms
 ) {
-    console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
-    if(!(guestdetails instanceof Array)) {
+    console.log(
+        guestdetails,
+        rooms,
+        id,
+        name,
+        checkindate,
+        checkoutdate,
+        guestnumber
+    );
+    if (!(guestdetails instanceof Array)) {
         console.log("entering");
         guestdetails = [guestdetails];
     }
-    console.log(guestdetails, rooms, id, name, checkindate, checkoutdate, guestnumber);
+    console.log(
+        guestdetails,
+        rooms,
+        id,
+        name,
+        checkindate,
+        checkoutdate,
+        guestnumber
+    );
     io.emit("call_from_chatbot", {
         id,
         name,
@@ -192,7 +208,7 @@ async function search_hotel(
     return res;
 }
 const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.5-pro",
     systemInstruction: `
   1. Hotel Booking
 
